@@ -6,8 +6,11 @@ class Ship {
   }
 
   hit() {
-    this.timesHit += 1;
-    return true;
+    if (this.isSunk()) {
+      return 'Cannot hit the ship. It is sunk already';
+    } else {
+      this.timesHit += 1;
+    }
   }
 
   isSunk() {
