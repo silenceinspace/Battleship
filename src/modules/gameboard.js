@@ -128,9 +128,7 @@ class Gameboard {
   placeShip(x, y, shipSize, direction = 'hor') {
     if (!this.#fitInBoardLimits(x, y)) {
       return 'Cannot place the ship outside the board';
-    }
-
-    if (this.#confirmCoordinatesAreNotAvailable(x, y)) {
+    } else if (this.#confirmCoordinatesAreNotAvailable(x, y)) {
       return 'Cannot place the ship in cells taken by another ship';
     }
 
@@ -153,16 +151,12 @@ class Gameboard {
         }
       }
 
-      // Try to group all the limiting methods in one if statement block??
+      // Check if any of these restrictions is broken before creating the ship
       if (!this.#fitInBoardLimits(shiftedX, shiftedY)) {
         return 'Cannot place the ship outside the board';
-      }
-
-      if (this.#confirmCoordinatesAreNotAvailable(shiftedX, shiftedY)) {
+      } else if (this.#confirmCoordinatesAreNotAvailable(shiftedX, shiftedY)) {
         return 'Cannot place the ship in cells taken by another ship';
-      }
-
-      if (this.#enterAnotherShipCoordinates(shiftedX, shiftedY)) {
+      } else if (this.#enterAnotherShipCoordinates(shiftedX, shiftedY)) {
         return 'Cannot place the ship right beside another ship';
       }
 
