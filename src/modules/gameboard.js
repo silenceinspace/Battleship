@@ -26,7 +26,11 @@ class Gameboard {
     return board;
   }
 
-  #fitInBoardLimits(coordinateX, coordinateY) {
+  #fitInBoardLimits(...coordinates) {
+    const arrayWithArguments = coordinates;
+    const coordinateX = arrayWithArguments[0];
+    const coordinateY = arrayWithArguments[1];
+
     if (Array.isArray(coordinateX) && Array.isArray(coordinateY)) {
       const xIsOutsideBoard = coordinateX.filter((x) => x > 9);
       const yIsOutsideBoard = coordinateY.filter((y) => y > 9);
@@ -49,7 +53,11 @@ class Gameboard {
     }
   }
 
-  #reserveAdjacentCoordinates(coordinateX, coordinateY) {
+  #reserveAdjacentCoordinates(...coordinates) {
+    const arrayWithArguments = coordinates;
+    const coordinateX = arrayWithArguments[0];
+    const coordinateY = arrayWithArguments[1];
+
     const adjacentCoordinatesOfX = [-1, 0, 1, 1, 1, 0, -1, -1];
     const adjacentCoordinatesOfY = [-1, -1, -1, 0, 1, 1, 1, 0];
 
@@ -67,6 +75,9 @@ class Gameboard {
       }
     }
   }
+
+  /*   #confirmCoordinatesAreNotAvailable(coordinateX, coordinateY){
+  } */
 
   #confirmCoordinatesAreNotAvailable(coordinateX, coordinateY) {
     let areNotAvailableCoordinates;
