@@ -126,13 +126,12 @@ class Gameboard {
   }
 
   placeShip(x, y, shipSize, direction = 'hor') {
-    if (!this.#fitInBoardLimits(x, y)) {
-      return 'Cannot place the ship outside the board';
-    } else if (this.#confirmCoordinatesAreNotAvailable(x, y)) {
-      return 'Cannot place the ship in cells taken by another ship';
+    const ship = new Ship(shipSize);
+
+    if (ship.length < 1 || ship.length > 4) {
+      return 'Cannot place a ship of this length. Min length is 1. Max length is 4.';
     }
 
-    const ship = new Ship(shipSize);
     if (ship.length > 1) {
       const shiftedX = [];
       const shiftedY = [];
@@ -171,10 +170,14 @@ class Gameboard {
     } else if (ship.length === 1) {
       if (this.#enterAnotherShipCoordinates(x, y)) {
         return 'Cannot place the ship right beside another ship';
-      } else {
-        this.board.at(x).at(y).at(0).containsShip = ship;
-        this.#reserveAdjacentCoordinates(x, y);
+      } else if (!this.#fitInBoardLimits(x, y)) {
+        return 'Cannot place the ship outside the board';
+      } else if (this.#confirmCoordinatesAreNotAvailable(x, y)) {
+        return 'Cannot place the ship in cells taken by another ship';
       }
+
+      this.board.at(x).at(y).at(0).containsShip = ship;
+      this.#reserveAdjacentCoordinates(x, y);
     }
   }
 }
