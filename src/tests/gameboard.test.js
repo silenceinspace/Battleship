@@ -96,4 +96,28 @@ describe('Test public interface of a gameboard', () => {
       'Cannot place a ship of this length. Min length is 1. Max length is 4.'
     );
   });
+
+  test('placeShip() cannot place more than 10 ships on the board', () => {
+    const gameboard = new Gameboard();
+    expect(gameboard.allShips).toBe(0);
+
+    let coordinateOfX = 0;
+    let coordinateOfY = 0;
+    let timesWillRun = 10;
+    while (timesWillRun) {
+      gameboard.placeShip(coordinateOfX, coordinateOfY, 1);
+      coordinateOfX += 2;
+      timesWillRun--;
+
+      if (timesWillRun === 5) {
+        coordinateOfX = 0;
+        coordinateOfY = 3;
+      }
+    }
+
+    expect(gameboard.allShips).toBe(10);
+    expect(gameboard.placeShip(0, 6, 1)).toBe(
+      'There are 10 ships on the board. The limit is reached.'
+    );
+  });
 });
