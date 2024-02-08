@@ -57,9 +57,10 @@ class Gameboard {
       const x = coordinateX + adjacentCoordinatesOfX[i];
       const y = coordinateY + adjacentCoordinatesOfY[i];
 
-      // Also if it tries to "reserve" coordinates belong to the same ship, don't
-      // Check if that's the same object instance?
+      // Also if it tries to "reserve" coordinates that belong to the same ship, don't
       if (x > 9 || y > 9 || x < 0 || y < 0) {
+        continue;
+      } else if (this.board.at(x).at(y).at(0).containsShip) {
         continue;
       } else {
         this.board.at(x).at(y).at(0).adjacentToNearestShip = true;
@@ -165,15 +166,18 @@ class Gameboard {
 
       // Make sure there is a gap between two ships
       for (let i = 0; i < ship.length; i++) {
-        this.#reserveAdjacentCoordinates(shiftedX[i], shiftedY[i]);
         this.board.at(shiftedX[i]).at(shiftedY[i]).at(0).containsShip = ship;
+      }
+
+      for (let i = 0; i < ship.length; i++) {
+        this.#reserveAdjacentCoordinates(shiftedX[i], shiftedY[i]);
       }
     } else if (ship.length === 1) {
       if (this.#enterAnotherShipCoordinates(x, y)) {
         return 'Cannot place the ship right beside another ship';
       } else {
-        this.#reserveAdjacentCoordinates(x, y);
         this.board.at(x).at(y).at(0).containsShip = ship;
+        this.#reserveAdjacentCoordinates(x, y);
       }
     }
   }
