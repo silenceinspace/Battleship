@@ -76,58 +76,48 @@ class Gameboard {
     }
   }
 
-  /*   #confirmCoordinatesAreNotAvailable(coordinateX, coordinateY){
-  } */
-
-  #confirmCoordinatesAreNotAvailable(coordinateX, coordinateY) {
-    let areNotAvailableCoordinates;
-    if (Array.isArray(coordinateX) && Array.isArray(coordinateY)) {
-      for (let i = 0; i < coordinateX.length; i++) {
-        areNotAvailableCoordinates = this.board
-          .at(coordinateX[i])
-          .at(coordinateY[i])
-          .at(0).containsShip;
-
-        if (areNotAvailableCoordinates) {
-          return true;
-        }
-      }
-      return false;
-    } else {
-      areNotAvailableCoordinates = this.board
-        .at(coordinateX)
-        .at(coordinateY)
-        .at(0).containsShip;
-
-      if (areNotAvailableCoordinates) {
-        return true;
-      } else {
-        return false;
-      }
-    }
+  #confirmCoordinatesAreNotAvailable(...coordinates) {
+    const resultOfHelper = this.#accessPropertyOnShipObject(
+      coordinates,
+      'containsShip'
+    );
+    return resultOfHelper;
   }
 
-  #enterAnotherShipCoordinates(coordinateX, coordinateY) {
-    let areReservedCoordinates;
+  #enterAnotherShipCoordinates(...coordinates) {
+    const resultOfHelper = this.#accessPropertyOnShipObject(
+      coordinates,
+      'adjacentToNearestShip'
+    );
+    return resultOfHelper;
+  }
+
+  #accessPropertyOnShipObject(...coordinatesAndProperty) {
+    // Use the rest operator to place all arguments into one array and then extract specific parts of it
+    const arrayWithArguments = coordinatesAndProperty;
+    const coordinateX = arrayWithArguments[0][0];
+    const coordinateY = arrayWithArguments[0][1];
+    const property = arrayWithArguments[1];
+
+    let willCancelShipCreation;
     if (Array.isArray(coordinateX) && Array.isArray(coordinateY)) {
       for (let i = 0; i < coordinateX.length; i++) {
-        areReservedCoordinates = this.board
+        willCancelShipCreation = this.board
           .at(coordinateX[i])
           .at(coordinateY[i])
-          .at(0).adjacentToNearestShip;
+          .at(0)[property];
 
-        if (areReservedCoordinates) {
+        if (willCancelShipCreation) {
           return true;
         }
       }
       return false;
     } else {
-      areReservedCoordinates = this.board
-        .at(coordinateX)
-        .at(coordinateY)
-        .at(0).adjacentToNearestShip;
+      willCancelShipCreation = this.board.at(coordinateX).at(coordinateY).at(0)[
+        property
+      ];
 
-      if (areReservedCoordinates) {
+      if (willCancelShipCreation) {
         return true;
       } else {
         return false;
@@ -163,6 +153,7 @@ class Gameboard {
         }
       }
 
+      // Try to group all the limiting methods in one if statement block??
       if (!this.#fitInBoardLimits(shiftedX, shiftedY)) {
         return 'Cannot place the ship outside the board';
       }
