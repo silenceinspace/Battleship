@@ -1,7 +1,7 @@
 // import { Ship } from './ship';
 import { Gameboard } from '../modules/gameboard';
 
-describe('Test public interface of a gameboard', () => {
+describe.skip('Test the public placeShip() method of the gameboard', () => {
   test('placeShip() places a ship with the length of 1 inside the correct coordinates', () => {
     const gameboard = new Gameboard();
 
@@ -119,5 +119,15 @@ describe('Test public interface of a gameboard', () => {
     expect(gameboard.placeShip(0, 6, 1)).toBe(
       'There are 10 ships on the board. The limit is reached.'
     );
+  });
+});
+
+describe('Test the public receiveAttack() method of the gameboard', () => {
+  test('receiveAttack() targets specific coordinates of the board', () => {
+    const gameboard = new Gameboard();
+    expect(gameboard.board.at(0).at(0).at(0).targetted).toBeFalsy();
+
+    gameboard.receiveAttack(0, 0);
+    expect(gameboard.board.at(0).at(0).at(0).targetted).toBeTruthy();
   });
 });

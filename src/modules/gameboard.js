@@ -19,6 +19,7 @@ class Gameboard {
             adjacentToNearestShip: false,
             missed: false,
             adjacentToSunkShip: false,
+            targetted: false,
           },
         ]);
       }
