@@ -130,9 +130,7 @@ class Gameboard {
 
     if (this.allShips >= 10) {
       return 'There are 10 ships on the board. The limit is reached.';
-    }
-
-    if (ship.length < 1 || ship.length > 4) {
+    } else if (ship.length < 1 || ship.length > 4) {
       return 'Cannot place a ship of this length. Min length is 1. Max length is 4.';
     }
 
