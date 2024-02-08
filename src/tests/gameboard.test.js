@@ -66,7 +66,7 @@ describe('Test public interface of a gameboard', () => {
     );
   });
 
-  test('placeShip() cannot place ships next to each other. Mix gap must be 1 cell', () => {
+  test('placeShip() cannot place ships next to each other. Min gap must be 1 cell', () => {
     const gameboard = new Gameboard();
 
     gameboard.placeShip(0, 0, 1);
@@ -80,7 +80,7 @@ describe('Test public interface of a gameboard', () => {
     );
 
     gameboard.placeShip(8, 8, 2, 'ver');
-    expect(gameboard.placeShip(8, 5, 4, 'ver')).toBe(
+    expect(gameboard.placeShip(8, 5, 3, 'ver')).toBe(
       'Cannot place the ship right beside another ship'
     );
   });
