@@ -84,4 +84,16 @@ describe('Test public interface of a gameboard', () => {
       'Cannot place the ship right beside another ship'
     );
   });
+
+  test('placeShip() cannot place ships of length greater than 4 or smaller than 1', () => {
+    const gameboard = new Gameboard();
+
+    expect(gameboard.placeShip(1, 1, 0)).toBe(
+      'Cannot place a ship of this length. Min length is 1. Max length is 4.'
+    );
+
+    expect(gameboard.placeShip(3, 3, 5)).toBe(
+      'Cannot place a ship of this length. Min length is 1. Max length is 4.'
+    );
+  });
 });
