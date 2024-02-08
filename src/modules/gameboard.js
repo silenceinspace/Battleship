@@ -128,6 +128,10 @@ class Gameboard {
   placeShip(x, y, shipSize, direction = 'hor') {
     const ship = new Ship(shipSize);
 
+    if (this.allShips >= 10) {
+      return 'There are 10 ships on the board. The limit is reached.';
+    }
+
     if (ship.length < 1 || ship.length > 4) {
       return 'Cannot place a ship of this length. Min length is 1. Max length is 4.';
     }
@@ -164,6 +168,7 @@ class Gameboard {
         this.board.at(shiftedX[i]).at(shiftedY[i]).at(0).containsShip = ship;
       }
 
+      // Get rid of this loop here and move in inside the method???
       for (let i = 0; i < ship.length; i++) {
         this.#reserveAdjacentCoordinates(shiftedX[i], shiftedY[i]);
       }
@@ -179,5 +184,7 @@ class Gameboard {
       this.board.at(x).at(y).at(0).containsShip = ship;
       this.#reserveAdjacentCoordinates(x, y);
     }
+
+    this.allShips += 1;
   }
 }
