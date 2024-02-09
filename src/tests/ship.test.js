@@ -1,7 +1,7 @@
 import { Ship } from '../modules/ship';
 
-describe.skip('Test public interface of a ship', () => {
-  test('hit() increments the number of hits a ship has received', () => {
+describe('Test public interface of a Ship class', () => {
+  test('hit() increments the number of hits the ship has received', () => {
     const ship = new Ship(2);
 
     expect(ship.timesHit).toBe(0);
@@ -11,7 +11,7 @@ describe.skip('Test public interface of a ship', () => {
     expect(ship.timesHit).toBe(2);
   });
 
-  test('isSunk() returns if a ship has been sunk or not', () => {
+  test('isSunk() returns if the ship has been sunk or not', () => {
     const ship = new Ship(3);
 
     ship.hit();
@@ -22,7 +22,7 @@ describe.skip('Test public interface of a ship', () => {
     expect(ship.isSunk()).toBeTruthy();
   });
 
-  test('hit() cannot be called on a sunk ship', () => {
+  test('hit() cannot be called on sunk ships', () => {
     const ship = new Ship(1);
 
     ship.hit();

@@ -9,7 +9,7 @@ class Gameboard {
   }
 
   #createGameboard() {
-    let board = [];
+    const board = [];
     for (let i = 0; i < 10; i++) {
       board[i] = [];
       for (let j = 0; j < 10; j++) {
@@ -17,10 +17,10 @@ class Gameboard {
         board[i].push([
           {
             containsShip: false,
-            adjacentToNearestShip: false,
-            missed: false,
-            adjacentToSunkShip: false,
-            targetted: false,
+            isAdjacentToSomeShip: false,
+            isMissedShot: false,
+            isAdjacentToSomeSunkShip: false,
+            hasBeenTargetted: false,
           },
         ]);
       }
@@ -29,14 +29,14 @@ class Gameboard {
   }
 
   #fitInBoardLimits(...coordinates) {
-    const arrayWithArguments = coordinates;
-    const coordinateX = arrayWithArguments[0];
-    const coordinateY = arrayWithArguments[1];
+    const arrayWithCoordinates = coordinates;
+    const x = arrayWithCoordinates[0];
+    const y = arrayWithCoordinates[1];
 
     // Check limits of ships of length 1 as well as 2,3,4 (the latter will be created with coordinate combinations in two arrays)
-    if (Array.isArray(coordinateX) && Array.isArray(coordinateY)) {
-      const xIsOutsideBoard = coordinateX.filter((x) => x > 9);
-      const yIsOutsideBoard = coordinateY.filter((y) => y > 9);
+    if (Array.isArray(x) && Array.isArray(y)) {
+      const xIsOutsideBoard = x.filter((x) => x > 9);
+      const yIsOutsideBoard = y.filter((y) => y > 9);
       if (xIsOutsideBoard.length || yIsOutsideBoard.length) {
         return false;
       } else {
@@ -44,22 +44,17 @@ class Gameboard {
       }
     }
 
-    if (
-      coordinateX > 9 ||
-      coordinateY > 9 ||
-      coordinateX < 0 ||
-      coordinateY < 0
-    ) {
+    if (x > 9 || y > 9 || x < 0 || y < 0) {
       return false;
     } else {
       return true;
     }
   }
 
-  #reserveAdjacentCoordinates(...coordinates) {
-    const arrayWithArguments = coordinates;
-    const coordinateX = arrayWithArguments[0];
-    const coordinateY = arrayWithArguments[1];
+  #reserveSquaresAdjacentToShip(...coordinates) {
+    const arrayWithCoordinates = coordinates;
+    const coordinateX = arrayWithCoordinates[0];
+    const coordinateY = arrayWithCoordinates[1];
 
     // Use two arrays filled with all possible adjacent squares of the coordinates
     const adjacentCoordinatesOfX = [-1, 0, 1, 1, 1, 0, -1, -1];
@@ -72,10 +67,9 @@ class Gameboard {
       if (x > 9 || y > 9 || x < 0 || y < 0) {
         continue;
       } else if (this.board.at(x).at(y).at(0).containsShip) {
-        // If the square is a part of the ship, its continuation, it's not adjacent. It contains a ship
         continue;
       } else {
-        this.board.at(x).at(y).at(0).adjacentToNearestShip = true;
+        this.board.at(x).at(y).at(0).isAdjacentToSomeShip = true;
       }
     }
   }
@@ -88,10 +82,10 @@ class Gameboard {
     return resultOfHelper;
   }
 
-  #enterAnotherShipCoordinates(...coordinates) {
+  #standInAnotherShipAdjacentSquares(...coordinates) {
     const resultOfHelper = this.#accessPropertyOnShipObject(
       coordinates,
-      'adjacentToNearestShip'
+      'isAdjacentToSomeShip'
     );
     return resultOfHelper;
   }
@@ -99,17 +93,15 @@ class Gameboard {
   // Use the rest operator to place all arguments into one array and then extract specific parts of it
   #accessPropertyOnShipObject(...coordinatesAndProperty) {
     const arrayWithArguments = coordinatesAndProperty;
-    const coordinateX = arrayWithArguments[0][0];
-    const coordinateY = arrayWithArguments[0][1];
+    const x = arrayWithArguments[0][0];
+    const y = arrayWithArguments[0][1];
     const property = arrayWithArguments[1];
 
     let willCancelShipCreation;
-    if (Array.isArray(coordinateX) && Array.isArray(coordinateY)) {
-      for (let i = 0; i < coordinateX.length; i++) {
-        willCancelShipCreation = this.board
-          .at(coordinateX[i])
-          .at(coordinateY[i])
-          .at(0)[property]; // Access a property on the ship with which the method was called
+    if (Array.isArray(x) && Array.isArray(y)) {
+      for (let i = 0; i < x.length; i++) {
+        // Access a property on the ship with which the method was called
+        willCancelShipCreation = this.board.at(x[i]).at(y[i]).at(0)[property];
 
         if (willCancelShipCreation) {
           return true;
@@ -117,9 +109,7 @@ class Gameboard {
       }
       return false;
     } else {
-      willCancelShipCreation = this.board.at(coordinateX).at(coordinateY).at(0)[
-        property
-      ];
+      willCancelShipCreation = this.board.at(x).at(y).at(0)[property];
 
       if (willCancelShipCreation) {
         return true;
@@ -133,53 +123,58 @@ class Gameboard {
     const ship = new Ship(shipSize);
 
     if (this.allShips >= 10) {
-      return 'There are 10 ships on the board. The limit is reached.';
+      return 'There are 10 ships on the board. The limit is reached';
     } else if (ship.length < 1 || ship.length > 4) {
-      return 'Cannot place a ship of this length. Min length is 1. Max length is 4.';
+      return 'Cannot place a ship of this length. Min length is 1. Max length is 4';
     }
 
     if (ship.length > 1) {
       // Create two arrays to place ships over multiple squares, doing it in both directions.
-      const shiftedX = [];
-      const shiftedY = [];
+      const allValuesOfX = [];
+      const allValuesOfY = [];
 
       // If placed horizontally, the ship's first square will generate the rest of squares to the right, without changing the row
       if (direction === 'hor') {
         for (let i = 0; i < ship.length; i++) {
-          shiftedX.push(x);
-          shiftedY.push(y);
+          allValuesOfX.push(x);
+          allValuesOfY.push(y);
           x += 1;
         }
         // If placed vertically, the ship's first square will generate the rest of squares below, without changing the column
       } else if (direction === 'ver') {
         for (let i = 0; i < ship.length; i++) {
-          shiftedX.push(x);
-          shiftedY.push(y);
+          allValuesOfX.push(x);
+          allValuesOfY.push(y);
           y += 1;
         }
       }
 
       // Check if any of these restrictions is broken before placing a ship. If yes, the ship is not placed on the board
-      if (!this.#fitInBoardLimits(shiftedX, shiftedY)) {
+      if (!this.#fitInBoardLimits(allValuesOfX, allValuesOfY)) {
         return 'Cannot place the ship outside the board';
-      } else if (this.#confirmCoordinatesAreNotAvailable(shiftedX, shiftedY)) {
+      } else if (
+        this.#confirmCoordinatesAreNotAvailable(allValuesOfX, allValuesOfY)
+      ) {
         return 'Cannot place the ship in cells taken by another ship';
-      } else if (this.#enterAnotherShipCoordinates(shiftedX, shiftedY)) {
+      } else if (
+        this.#standInAnotherShipAdjacentSquares(allValuesOfX, allValuesOfY)
+      ) {
         return 'Cannot place the ship right beside another ship';
       }
 
       // Make sure there is one square of a gap between two ships (in all directions)
       for (let i = 0; i < ship.length; i++) {
-        this.board.at(shiftedX[i]).at(shiftedY[i]).at(0).containsShip = ship;
+        this.board.at(allValuesOfX[i]).at(allValuesOfY[i]).at(0).containsShip =
+          ship;
       }
 
       // Refactore this part???
-      // Get rid of this loop here and move in inside reserveAdjacentCoordinates()
+      // Get rid of this loop here and move in inside reserveSquaresAdjacentToShip()
       for (let i = 0; i < ship.length; i++) {
-        this.#reserveAdjacentCoordinates(shiftedX[i], shiftedY[i]);
+        this.#reserveSquaresAdjacentToShip(allValuesOfX[i], allValuesOfY[i]);
       }
     } else if (ship.length === 1) {
-      if (this.#enterAnotherShipCoordinates(x, y)) {
+      if (this.#standInAnotherShipAdjacentSquares(x, y)) {
         return 'Cannot place the ship right beside another ship';
       } else if (!this.#fitInBoardLimits(x, y)) {
         return 'Cannot place the ship outside the board';
@@ -188,7 +183,7 @@ class Gameboard {
       }
 
       this.board.at(x).at(y).at(0).containsShip = ship;
-      this.#reserveAdjacentCoordinates(x, y);
+      this.#reserveSquaresAdjacentToShip(x, y);
     }
 
     this.allShips += 1;
@@ -206,22 +201,27 @@ class Gameboard {
     }
   }
 
-  #confirmCoordinatesWereTargettedAlready(arrayWithCoordinates) {
+  #confirmSquareHasBeenTargettedAlready(arrayWithCoordinates) {
     const x = arrayWithCoordinates[0];
     const y = arrayWithCoordinates[1];
 
-    if (this.board.at(x).at(y).at(0).targetted) return true;
-    else return false;
+    if (this.board.at(x).at(y).at(0).hasBeenTargetted) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
-  #targetShip(arrayWithCoordinates) {
+  #findTargettedShip(arrayWithCoordinates) {
     const x = arrayWithCoordinates[0];
     const y = arrayWithCoordinates[1];
 
-    let isTargettedShip = this.board.at(x).at(y).at(0).containsShip;
+    const isTargettedShip = this.board.at(x).at(y).at(0).containsShip;
     if (isTargettedShip) {
       return true;
-    } else return false;
+    } else {
+      return false;
+    }
   }
 
   receiveAttack(...pairOfCoordinates) {
@@ -232,20 +232,20 @@ class Gameboard {
     if (this.#targetCoordinatesOutsideBoard(arrayWithCoordinates)) {
       return 'Cannot target non-existent coordinates';
     } else if (
-      this.#confirmCoordinatesWereTargettedAlready(arrayWithCoordinates)
+      this.#confirmSquareHasBeenTargettedAlready(arrayWithCoordinates)
     ) {
       return 'Coordinates have been targetted already';
     }
 
     // Target the provided square successfully
-    this.board.at(x).at(y).at(0).targetted = true;
+    this.board.at(x).at(y).at(0).hasBeenTargetted = true;
 
-    if (this.#targetShip(arrayWithCoordinates)) {
+    if (this.#findTargettedShip(arrayWithCoordinates)) {
       // Don't forget!!!
       // hit() is going to be called here
       return 'Ship was targetted';
     } else {
-      this.board.at(x).at(y).at(0).missed = true;
+      this.board.at(x).at(y).at(0).isMissedShot = true;
       return 'Missed shot';
     }
   }

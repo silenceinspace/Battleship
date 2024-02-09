@@ -1,7 +1,7 @@
 // import { Ship } from './ship';
 import { Gameboard } from '../modules/gameboard';
 
-describe.skip('Test the public placeShip() method of the gameboard', () => {
+describe('Test the public placeShip() method of the gameboard', () => {
   test('placeShip() places a ship with the length of 1 inside the correct coordinates', () => {
     const gameboard = new Gameboard();
 
@@ -89,11 +89,11 @@ describe.skip('Test the public placeShip() method of the gameboard', () => {
     const gameboard = new Gameboard();
 
     expect(gameboard.placeShip(1, 1, 0)).toBe(
-      'Cannot place a ship of this length. Min length is 1. Max length is 4.'
+      'Cannot place a ship of this length. Min length is 1. Max length is 4'
     );
 
     expect(gameboard.placeShip(3, 3, 5)).toBe(
-      'Cannot place a ship of this length. Min length is 1. Max length is 4.'
+      'Cannot place a ship of this length. Min length is 1. Max length is 4'
     );
   });
 
@@ -117,7 +117,7 @@ describe.skip('Test the public placeShip() method of the gameboard', () => {
 
     expect(gameboard.allShips).toBe(10);
     expect(gameboard.placeShip(0, 6, 1)).toBe(
-      'There are 10 ships on the board. The limit is reached.'
+      'There are 10 ships on the board. The limit is reached'
     );
   });
 });
@@ -137,13 +137,13 @@ describe('Test the public receiveAttack() method of the gameboard', () => {
   test('receiveAttack() targets specific coordinates of the board', () => {
     const gameboard = new Gameboard();
 
-    expect(gameboard.board.at(0).at(0).at(0).targetted).toBeFalsy();
+    expect(gameboard.board.at(0).at(0).at(0).hasBeenTargetted).toBeFalsy();
     gameboard.receiveAttack(0, 0);
-    expect(gameboard.board.at(0).at(0).at(0).targetted).toBeTruthy();
+    expect(gameboard.board.at(0).at(0).at(0).hasBeenTargetted).toBeTruthy();
 
-    expect(gameboard.board.at(5).at(7).at(0).targetted).toBeFalsy();
+    expect(gameboard.board.at(5).at(7).at(0).hasBeenTargetted).toBeFalsy();
     gameboard.receiveAttack(5, 7);
-    expect(gameboard.board.at(5).at(7).at(0).targetted).toBeTruthy();
+    expect(gameboard.board.at(5).at(7).at(0).hasBeenTargetted).toBeTruthy();
   });
 
   test('receiveAttack() does not targe the same coordinates twice', () => {
@@ -173,12 +173,12 @@ describe('Test the public receiveAttack() method of the gameboard', () => {
     const gameboard = new Gameboard();
 
     gameboard.placeShip(5, 5, 1);
-    expect(gameboard.board.at(9).at(8).at(0).missed).toBeFalsy()
+    expect(gameboard.board.at(9).at(8).at(0).isMissedShot).toBeFalsy();
     expect(gameboard.receiveAttack(9, 8)).toBe('Missed shot');
-    expect(gameboard.board.at(9).at(8).at(0).missed).toBeTruthy()
+    expect(gameboard.board.at(9).at(8).at(0).isMissedShot).toBeTruthy();
 
-    expect(gameboard.board.at(3).at(2).at(0).missed).toBeFalsy()
+    expect(gameboard.board.at(3).at(2).at(0).isMissedShot).toBeFalsy();
     expect(gameboard.receiveAttack(3, 2)).toBe('Missed shot');
-    expect(gameboard.board.at(3).at(2).at(0).missed).toBeTruthy()
+    expect(gameboard.board.at(3).at(2).at(0).isMissedShot).toBeTruthy();
   });
 });
