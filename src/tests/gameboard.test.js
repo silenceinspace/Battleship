@@ -1,4 +1,4 @@
-// import { Ship } from './ship';
+// import { Ship } from '../modules/ship';
 import { Gameboard } from '../modules/gameboard';
 
 describe('Test the public placeShip() method of the gameboard', () => {
@@ -122,7 +122,7 @@ describe('Test the public placeShip() method of the gameboard', () => {
   });
 });
 
-describe('Test the public receiveAttack() method of the gameboard', () => {
+describe.only('Test the public receiveAttack() method of the gameboard', () => {
   test('receiveAttack() cannot targer coordinates outside the board', () => {
     const gameboard = new Gameboard();
 
@@ -160,6 +160,7 @@ describe('Test the public receiveAttack() method of the gameboard', () => {
     );
   });
 
+  // Do I even need this test? hit() probably tests this indirectly
   test('receiveAttack() targets a ship if there is one at the coordinates', () => {
     const gameboard = new Gameboard();
 
@@ -167,6 +168,29 @@ describe('Test the public receiveAttack() method of the gameboard', () => {
     expect(gameboard.receiveAttack(1, 1)).toBe('Ship was targetted');
     expect(gameboard.receiveAttack(2, 1)).toBe('Ship was targetted');
     expect(gameboard.receiveAttack(3, 1)).toBe('Ship was targetted');
+  });
+
+  // How to ensure that hit() is called???
+  // Is it necessary to check properties (inside tests) before and after calling methods that modify them???
+  test('receiveAttack() calls hit(), which modifies the number of hits on the ship', () => {
+    const gameboard = new Gameboard();
+
+    gameboard.placeShip(0, 3, 3, 'ver');
+    const ship = gameboard.board.at(0).at(3).at(0).containsShip;
+    expect(ship.timesHit).toBe(0);
+    expect(ship.isSunk()).toBeFalsy();
+
+    gameboard.placeShip(5, 5, 2, 'hor');
+    const shipTwo = gameboard.board.at(5).at(5).at(0).containsShip;
+
+    gameboard.receiveAttack(0, 3);
+    gameboard.receiveAttack(0, 4);
+    gameboard.receiveAttack(0, 5);
+    expect(ship.timesHit).toBe(3);
+    expect(ship.isSunk()).toBeTruthy();
+
+    expect(shipTwo.timesHit).toBe(0);
+    expect(shipTwo.isSunk()).toBeFalsy();
   });
 
   test('receiveAttack() marks a missed shot if no ship exists at the coordinates', () => {

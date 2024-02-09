@@ -241,8 +241,7 @@ class Gameboard {
     this.board.at(x).at(y).at(0).hasBeenTargetted = true;
 
     if (this.#findTargettedShip(arrayWithCoordinates)) {
-      // Don't forget!!!
-      // hit() is going to be called here
+      this.board.at(x).at(y).at(0).containsShip.hit();
       return 'Ship was targetted';
     } else {
       this.board.at(x).at(y).at(0).isMissedShot = true;
