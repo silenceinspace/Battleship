@@ -123,11 +123,62 @@ describe.skip('Test the public placeShip() method of the gameboard', () => {
 });
 
 describe('Test the public receiveAttack() method of the gameboard', () => {
+  test('receiveAttack() cannot targer coordinates outside the board', () => {
+    const gameboard = new Gameboard();
+
+    expect(gameboard.receiveAttack(-1, -5)).toBe(
+      'Cannot target non-existent coordinates'
+    );
+    expect(gameboard.receiveAttack(10, 5)).toBe(
+      'Cannot target non-existent coordinates'
+    );
+  });
+
   test('receiveAttack() targets specific coordinates of the board', () => {
     const gameboard = new Gameboard();
-    expect(gameboard.board.at(0).at(0).at(0).targetted).toBeFalsy();
 
+    expect(gameboard.board.at(0).at(0).at(0).targetted).toBeFalsy();
     gameboard.receiveAttack(0, 0);
     expect(gameboard.board.at(0).at(0).at(0).targetted).toBeTruthy();
+
+    expect(gameboard.board.at(5).at(7).at(0).targetted).toBeFalsy();
+    gameboard.receiveAttack(5, 7);
+    expect(gameboard.board.at(5).at(7).at(0).targetted).toBeTruthy();
+  });
+
+  test('receiveAttack() does not targe the same coordinates twice', () => {
+    const gameboard = new Gameboard();
+
+    gameboard.receiveAttack(1, 1);
+    expect(gameboard.receiveAttack(1, 1)).toBe(
+      'Coordinates have been targetted already'
+    );
+
+    gameboard.receiveAttack(3, 9);
+    expect(gameboard.receiveAttack(3, 9)).toBe(
+      'Coordinates have been targetted already'
+    );
+  });
+
+  test('receiveAttack() targets a ship if there is one at the coordinates', () => {
+    const gameboard = new Gameboard();
+
+    gameboard.placeShip(1, 1, 3, 'hor');
+    expect(gameboard.receiveAttack(1, 1)).toBe('Ship was targetted');
+    expect(gameboard.receiveAttack(2, 1)).toBe('Ship was targetted');
+    expect(gameboard.receiveAttack(3, 1)).toBe('Ship was targetted');
+  });
+
+  test('receiveAttack() marks a missed shot if no ship exists at the coordinates', () => {
+    const gameboard = new Gameboard();
+
+    gameboard.placeShip(5, 5, 1);
+    expect(gameboard.board.at(9).at(8).at(0).missed).toBeFalsy()
+    expect(gameboard.receiveAttack(9, 8)).toBe('Missed shot');
+    expect(gameboard.board.at(9).at(8).at(0).missed).toBeTruthy()
+
+    expect(gameboard.board.at(3).at(2).at(0).missed).toBeFalsy()
+    expect(gameboard.receiveAttack(3, 2)).toBe('Missed shot');
+    expect(gameboard.board.at(3).at(2).at(0).missed).toBeTruthy()
   });
 });

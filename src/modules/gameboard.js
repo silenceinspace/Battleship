@@ -186,4 +186,58 @@ class Gameboard {
 
     this.allShips += 1;
   }
+
+  #targetCoordinatesOutsideBoard(arrayWithCoordinates) {
+    const attackIsOutsideBoard = arrayWithCoordinates.filter((coordinate) => {
+      return coordinate > 9 || coordinate < 0;
+    });
+
+    if (attackIsOutsideBoard.length) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  #confirmCoordinatesWereTargettedAlready(arrayWithCoordinates) {
+    const x = arrayWithCoordinates[0];
+    const y = arrayWithCoordinates[1];
+
+    if (this.board.at(x).at(y).at(0).targetted) return true;
+    else return false;
+  }
+
+  #targetShip(arrayWithCoordinates) {
+    const x = arrayWithCoordinates[0];
+    const y = arrayWithCoordinates[1];
+
+    let isTargettedShip = this.board.at(x).at(y).at(0).containsShip;
+    if (isTargettedShip) {
+      return true;
+    } else return false;
+  }
+
+  receiveAttack(...pairOfCoordinates) {
+    const arrayWithCoordinates = pairOfCoordinates;
+    const x = arrayWithCoordinates[0];
+    const y = arrayWithCoordinates[1];
+
+    if (this.#targetCoordinatesOutsideBoard(arrayWithCoordinates)) {
+      return 'Cannot target non-existent coordinates';
+    } else if (
+      this.#confirmCoordinatesWereTargettedAlready(arrayWithCoordinates)
+    ) {
+      return 'Coordinates have been targetted already';
+    }
+
+    this.board.at(x).at(y).at(0).targetted = true;
+
+    if (this.#targetShip(arrayWithCoordinates)) {
+      // hit() is going to be called here
+      return 'Ship was targetted';
+    } else {
+      this.board.at(x).at(y).at(0).missed = true;
+      return 'Missed shot';
+    }
+  }
 }
