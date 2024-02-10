@@ -20,4 +20,8 @@ class Ship {
       return false;
     }
   }
+
+  getTimesHitProperty() {
+    return this.timesHit;
+  }
 }
