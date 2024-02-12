@@ -3,12 +3,12 @@ import { Ship } from '../modules/ship';
 describe.skip('Test public interface of a Ship class', () => {
   test('hit() increments the number of hits the ship has received', () => {
     const ship = new Ship(2);
+    expect(ship.getTimesHitProperty()).toBe(0);
 
-    expect(ship.timesHit).toBe(0);
     ship.hit();
     ship.hit();
 
-    expect(ship.timesHit).toBe(2);
+    expect(ship.getTimesHitProperty()).toBe(2);
   });
 
   test('isSunk() returns if the ship has been sunk or not', () => {
@@ -36,7 +36,7 @@ describe.skip('Test public interface of a Ship class', () => {
       ship.hit();
     }
 
-    expect(ship.timesHit).toBe(10);
+    expect(ship.getTimesHitProperty()).toBe(10);
     expect(ship.isSunk()).toBeTruthy();
   });
 });
