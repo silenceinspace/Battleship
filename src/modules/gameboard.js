@@ -65,6 +65,7 @@ class Gameboard {
       const x = coordinateX + adjacentCoordinatesOfX[i];
       const y = coordinateY + adjacentCoordinatesOfY[i];
 
+      // Refactor here too
       if (property === 'isAdjacentToSomeShip') {
         if (x > 9 || y > 9 || x < 0 || y < 0) {
           continue;
