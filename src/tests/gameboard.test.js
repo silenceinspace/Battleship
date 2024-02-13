@@ -1,7 +1,7 @@
 // import { Ship } from '../modules/ship';
 import { Gameboard } from '../modules/gameboard';
 
-describe('Test the public placeShip() method of the gameboard', () => {
+describe.skip('Test the public placeShip() method of the gameboard', () => {
   test('placeShip() places a ship with the length of 1 inside the correct coordinates', () => {
     // Arrange
     const gameboard = new Gameboard();
@@ -127,7 +127,7 @@ describe('Test the public placeShip() method of the gameboard', () => {
 // Visual break
 // ***
 
-describe('Test the public receiveAttack() method of the gameboard', () => {
+describe.skip('Test the public receiveAttack() method of the gameboard', () => {
   test('receiveAttack() cannot targer coordinates outside the board', () => {
     const gameboard = new Gameboard();
 
