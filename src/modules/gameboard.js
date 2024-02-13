@@ -13,12 +13,11 @@ class Gameboard {
     for (let i = 0; i < 10; i++) {
       board[i] = [];
       for (let j = 0; j < 10; j++) {
-        // Create an object in each square of the board to control its future flow
+        // In each square of the board, there is an object with a few properties to control the game's logic
         board[i].push([
           {
             containsShip: false,
             isAdjacentToSomeShip: false,
-            isMissedShot: false,
             isAdjacentToSomeSunkShip: false,
             hasBeenTargetted: false,
           },
@@ -28,16 +27,18 @@ class Gameboard {
     return board;
   }
 
+  // Helpers for placeShip()
   #fitInBoardLimits(...coordinates) {
     const arrayWithCoordinates = coordinates;
     const x = arrayWithCoordinates[0];
     const y = arrayWithCoordinates[1];
 
-    // Check limits of ships of length 1 as well as 2,3,4 (the latter will be created with coordinate combinations in two arrays)
+    // Arguments of this method come in two different flavors — they can be either individual X and Y values (case with a 1-square ship), or arrays with combinations of X and Y values (case with multiple-square ships)
+    // It is necessary to check only if they are greater than 9 in the context of arrays, because ships are expanded to the right/down by default — a two-square ship placed horizontally at [0,0] populates to [0,0], [1,0] and never to [0,0], [-1, 0]
     if (Array.isArray(x) && Array.isArray(y)) {
-      const xIsOutsideBoard = x.filter((x) => x > 9);
-      const yIsOutsideBoard = y.filter((y) => y > 9);
-      if (xIsOutsideBoard.length || yIsOutsideBoard.length) {
+      const valuesXAndY = [...x, ...y];
+      const xOrYIsOutsideBoard = valuesXAndY.filter((value) => value > 9);
+      if (xOrYIsOutsideBoard.length) {
         return false;
       } else {
         return true;
@@ -57,7 +58,8 @@ class Gameboard {
     const coordinateY = arrayWithCoordinates[1];
     const property = arrayWithCoordinates[2];
 
-    // Use two arrays filled with all possible adjacent squares of the coordinates
+    // Use two arrays filled with all possible options for adjacent squares
+    // A square can have 8 adjacent squares at most
     const adjacentCoordinatesOfX = [-1, 0, 1, 1, 1, 0, -1, -1];
     const adjacentCoordinatesOfY = [-1, -1, -1, 0, 1, 1, 1, 0];
 
@@ -65,23 +67,17 @@ class Gameboard {
       const x = coordinateX + adjacentCoordinatesOfX[i];
       const y = coordinateY + adjacentCoordinatesOfY[i];
 
-      // Refactor here too
+      if (x > 9 || y > 9 || x < 0 || y < 0) {
+        continue;
+      } else if (this.getInfoAtBoardCoordinates(x, y).containsShip) {
+        // Squares that are a part of the ship must not be reserved because they are not adjacent in any case
+        continue;
+      }
+
       if (property === 'isAdjacentToSomeShip') {
-        if (x > 9 || y > 9 || x < 0 || y < 0) {
-          continue;
-        } else if (this.getInfoAtBoardCoordinates(x, y).containsShip) {
-          continue;
-        } else {
-          this.getInfoAtBoardCoordinates(x, y).isAdjacentToSomeShip = true;
-        }
+        this.getInfoAtBoardCoordinates(x, y).isAdjacentToSomeShip = true;
       } else if (property === 'isAdjacentToSomeSunkShip') {
-        if (x > 9 || y > 9 || x < 0 || y < 0) {
-          continue;
-        } else if (this.getInfoAtBoardCoordinates(x, y).containsShip) {
-          continue;
-        } else {
-          this.getInfoAtBoardCoordinates(x, y).isAdjacentToSomeSunkShip = true;
-        }
+        this.getInfoAtBoardCoordinates(x, y).isAdjacentToSomeSunkShip = true;
       }
     }
   }
@@ -112,7 +108,7 @@ class Gameboard {
     let willCancelShipCreation;
     if (Array.isArray(x) && Array.isArray(y)) {
       for (let i = 0; i < x.length; i++) {
-        // Access a property on the ship with which the method was called
+        // Access a property on the ship with which the method was called in a less hard-coded manner with a dot notation
         willCancelShipCreation = this.getInfoAtBoardCoordinates(x[i], y[i])[
           property
         ];
@@ -133,17 +129,33 @@ class Gameboard {
     }
   }
 
+  #checkIfMaxNumberOfShipsIsReached() {
+    if (this.allShips.length >= 10) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  #limitPossibleLengthOfShips(ship) {
+    if (ship.length < 1 || ship.length > 4) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   placeShip(x, y, shipSize, direction = 'hor') {
     const ship = new Ship(shipSize);
 
-    if (this.allShips.length >= 10) {
+    if (this.#checkIfMaxNumberOfShipsIsReached()) {
       return 'There are 10 ships on the board. The limit is reached';
-    } else if (ship.length < 1 || ship.length > 4) {
+    } else if (this.#limitPossibleLengthOfShips(ship)) {
       return 'Cannot place a ship of this length. Min length is 1. Max length is 4';
     }
 
     if (ship.length > 1) {
-      // Create two arrays to place ships over multiple squares, doing it in both directions.
+      // Create two arrays to place ships over multiple squares, doing it in both directions
       const allValuesOfX = [];
       const allValuesOfY = [];
 
@@ -154,7 +166,7 @@ class Gameboard {
           allValuesOfY.push(y);
           x += 1;
         }
-        // If placed vertically, the ship's first square will generate the rest of squares below, without changing the column
+        // If placed vertically, the ship's first square will generate the rest of squares down, without changing the column
       } else if (direction === 'ver') {
         for (let i = 0; i < ship.length; i++) {
           allValuesOfX.push(x);
@@ -163,13 +175,13 @@ class Gameboard {
         }
       }
 
-      // Check if any of these restrictions is broken before placing a ship. If yes, the ship is not placed on the board
+      // Check if any of these restrictions is violated before placing a ship. If yes, the ship is not placed on the board
       if (!this.#fitInBoardLimits(allValuesOfX, allValuesOfY)) {
         return 'Cannot place the ship outside the board';
       } else if (
         this.#confirmCoordinatesAreNotAvailable(allValuesOfX, allValuesOfY)
       ) {
-        return 'Cannot place the ship in cells taken by another ship';
+        return 'Cannot place the ship in squares taken by another ship';
       } else if (
         this.#standInAnotherShipAdjacentSquares(allValuesOfX, allValuesOfY)
       ) {
@@ -183,6 +195,7 @@ class Gameboard {
           allValuesOfY[i]
         ).containsShip = ship;
 
+        // Store ships inside the allShips array with their coordinates to be able to easier answer if the attacked coordinates belong to any ship
         if (i === 0) {
           this.allShips.push({
             shipInstance: ship,
@@ -195,7 +208,7 @@ class Gameboard {
         }
       }
 
-      // Refactore this part??? Get rid of this loop here and move in inside reserveAdjacentSquares()
+      // Keep reserveAdjacentSquares() in a separate loop because it is important all ships to be priorly created to reserve only truly adjacent squares. The other 2 squares of a ship with the length of 3 are not adjacent; They are a part of the ship
       for (let i = 0; i < ship.length; i++) {
         this.#reserveAdjacentSquares(
           allValuesOfX[i],
@@ -209,7 +222,7 @@ class Gameboard {
       } else if (!this.#fitInBoardLimits(x, y)) {
         return 'Cannot place the ship outside the board';
       } else if (this.#confirmCoordinatesAreNotAvailable(x, y)) {
-        return 'Cannot place the ship in cells taken by another ship';
+        return 'Cannot place the ship in squares taken by another ship';
       }
 
       this.getInfoAtBoardCoordinates(x, y).containsShip = ship;
@@ -218,6 +231,7 @@ class Gameboard {
     }
   }
 
+  // Helpers for receiveAttack()
   #targetCoordinatesOutsideBoard(arrayWithCoordinates) {
     const attackIsOutsideBoard = arrayWithCoordinates.filter((coordinate) => {
       return coordinate > 9 || coordinate < 0;
@@ -256,8 +270,7 @@ class Gameboard {
     const x = arrayWithCoordinates[0];
     const y = arrayWithCoordinates[1];
 
-    const isTargettedShip = this.getInfoAtBoardCoordinates(x, y).containsShip;
-    if (isTargettedShip) {
+    if (this.getInfoAtBoardCoordinates(x, y).containsShip) {
       return true;
     } else {
       return false;
@@ -276,7 +289,6 @@ class Gameboard {
     }
   }
 
-  // Add comments to clarify some parts below...
   receiveAttack(...pairOfCoordinates) {
     const arrayWithCoordinates = pairOfCoordinates;
     const x = arrayWithCoordinates[0];
@@ -296,18 +308,20 @@ class Gameboard {
       return 'Another sunk ship has made these coordinates unavailable';
     }
 
-    // Target the provided square successfully
+    // Target the provided square successfully only if none of the above conditions terminates this method
     this.getInfoAtBoardCoordinates(x, y).hasBeenTargetted = true;
 
+    // hasBeenTargetted property can either mean a successful attack (hit a ship) or a failed one (a missed shot)
     if (this.#findTargettedShip(arrayWithCoordinates)) {
-      this.getSpecificShip(x, y).hit();
+      const targettedShip = this.getSpecificShip(x, y);
+      targettedShip.hit();
 
-      if (this.getSpecificShip(x, y).isSunk()) {
-        const ship = this.getSpecificShip(x, y);
-        this.sunkShips.push(ship);
+      if (targettedShip.isSunk()) {
+        this.sunkShips.push(targettedShip);
         const shipSquares = this.getSpecificShip(x, y, 'coordinates');
 
-        if (ship.length === 1) {
+        // Squares around a sunk ship are not possible for attacks because they cannot contain another ship based on the rules of ships' placing — there must be a one-square gap between two different ships
+        if (targettedShip.length === 1) {
           this.#reserveAdjacentSquares(
             shipSquares[0],
             shipSquares[1],
@@ -323,8 +337,6 @@ class Gameboard {
           }
         }
       }
-    } else {
-      this.getInfoAtBoardCoordinates(x, y).isMissedShot = true;
     }
   }
 
@@ -341,6 +353,9 @@ class Gameboard {
   }
 
   getSpecificShip(x, y, property = 'shipInstance') {
+    // Array allShips is an array featuring objects with the 'shipInstance' and 'coordinates' properties
+    // If inside 'shipInstance' there is a ship with the length of 1, then its coordinates are stored inside a single array — [...]
+    // However, if it's a longer ship, then a few different coordinates are associated with the ship and attacking any of them should hit that ship. In that case, store individual coordinates inside another array — [[...], [...]]
     const ship = this.getAllShips().filter((item) => {
       if (!Array.isArray(item.coordinates[0])) {
         return item.coordinates[0] === x && item.coordinates[1] === y
@@ -359,3 +374,14 @@ class Gameboard {
     return ship[0][property];
   }
 }
+
+/* For future reflections:
+
+1. Is it necessary to duplicate 90% of a function's body to specify the exact case? Or is it more appropriate to host all restraints under one umbrella and put in else if statements instead?
+Could these be not 3 methods but 1?
+- confirmSquareHasBeenTargettedAlready();
+- confirmSquareIsDisabledByAnotherShip();
+- findTargettedShip();
+
+2. How should methods/functions be named? Should they start with a verb all the time? Should they directly represent their meaning — "confirmCoordinatesAreAvailable()" + true/false to naturally call something else depending on the result instead of "checkIfCoordinatesAreAvailable()"
+*/
