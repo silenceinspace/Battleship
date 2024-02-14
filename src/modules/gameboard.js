@@ -338,6 +338,9 @@ class Gameboard {
         }
       }
     }
+
+    // Computer can get coordinates that are not possible to attack, which is going to terminate this method sooner than this part comes in, If computer's receiveAttack() proceeds here, it means the attack was successful (potentially create an array to populate it with the already attacked coordinates )
+    return 'Registered attack';
   }
 
   getInfoAtBoardCoordinates(x, y) {

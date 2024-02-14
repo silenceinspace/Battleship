@@ -16,8 +16,16 @@ class Player {
     }
 
     if (this.name === 'Computer') {
-      //   const x = Math.floor(Math.random() * 9, 1);
-      // generate a random possible move here
+      console.log('Computers move:')
+      let x;
+      let y;
+      do {
+        x = Math.floor(Math.random() * 2);
+        y = Math.floor(Math.random() * 2);
+        console.log(x, y);
+      } while (this.enemyBoard.receiveAttack(x, y) !== 'Registered attack');
+
+      return [x, y];
     }
   }
 }

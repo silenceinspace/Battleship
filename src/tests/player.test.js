@@ -28,21 +28,22 @@ describe('Player objects are instantiated and hold two boards', () => {
     const humanBoard = new Gameboard();
     const computerBoard = new Gameboard();
     const computer = new Player('Computer', computerBoard, humanBoard);
-    expect(
-      humanBoard.getInfoAtBoardCoordinates(0, 0).hasBeenTargetted
-    ).toBeFalsy();
-    expect(
-      humanBoard.getInfoAtBoardCoordinates(9, 3).hasBeenTargetted
-    ).toBeFalsy();
 
-    computer.attackOpponent();
-    computer.attackOpponent();
+    const firstAttack = computer.attackOpponent();
+    const secondAttack = computer.attackOpponent();
+    const thirdAttack = computer.attackOpponent();
 
     expect(
-      humanBoard.getInfoAtBoardCoordinates(0, 0).hasBeenTargetted
+      humanBoard.getInfoAtBoardCoordinates(firstAttack[0], firstAttack[1])
+        .hasBeenTargetted
     ).toBeTruthy();
     expect(
-      humanBoard.getInfoAtBoardCoordinates(9, 3).hasBeenTargetted
+      humanBoard.getInfoAtBoardCoordinates(secondAttack[0], secondAttack[1])
+        .hasBeenTargetted
+    ).toBeTruthy();
+    expect(
+      humanBoard.getInfoAtBoardCoordinates(thirdAttack[0], thirdAttack[1])
+        .hasBeenTargetted
     ).toBeTruthy();
   });
 });
