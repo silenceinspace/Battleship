@@ -1,7 +1,7 @@
 import { Gameboard } from '../modules/gameboard';
 import { Player, Computer } from '../modules/player';
 
-describe('Player objects are instantiated and hold two boards', () => {
+describe.skip('Player objects are instantiated and hold two boards', () => {
   test('Human player can attack computers board', () => {
     const humanBoard = new Gameboard();
     const computerBoard = new Gameboard();

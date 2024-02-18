@@ -6,6 +6,7 @@ class Gameboard {
     this.board = this.#createGameboard();
     this.allShips = [];
     this.sunkShips = [];
+    this.gameOver = false;
   }
 
   #createGameboard() {
@@ -277,12 +278,18 @@ class Gameboard {
     }
   }
 
-  #checkGameState() {
+  #checkIfAllShipsHaveBeenDestroyed() {
     if (
       this.allShips.length === this.sunkShips.length &&
       this.allShips.length &&
       this.sunkShips.length
     ) {
+      this.gameOver = true;
+    }
+  }
+
+  #checkGameState() {
+    if (this.gameOver) {
       return true;
     } else {
       return false;
@@ -336,6 +343,9 @@ class Gameboard {
             );
           }
         }
+
+        // Gameboard should keep track of its termination state because GameLoop will rely on it later
+        this.#checkIfAllShipsHaveBeenDestroyed();
       }
     }
   }

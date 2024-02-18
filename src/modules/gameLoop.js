@@ -4,8 +4,6 @@ export { GameLoop };
 
 class GameLoop {
   constructor() {
-    this.thereIsAWinner = false;
-    this.attacksNow = this.playerOne;
     this.humanBoard = this.#populateBoardWithShips();
     this.computerBoard = this.#populateBoardWithShips();
     this.playerOne = new Player('Human', this.humanBoard, this.computerBoard);
@@ -14,12 +12,14 @@ class GameLoop {
       this.computerBoard,
       this.humanBoard
     );
+    this.attacksNow = this.playerOne;
+    this.thereIsAWinner = null;
   }
 
+  // Place 10 ships at pretedermined coodinates for now
   #populateBoardWithShips() {
     const board = new Gameboard();
 
-    // Place 10 ships at pretedermined coodinates
     board.placeShip(0, 0, 1);
     board.placeShip(9, 9, 1);
     board.placeShip(0, 9, 1);
@@ -32,5 +32,53 @@ class GameLoop {
     board.placeShip(8, 4, 4, 'ver');
 
     return board;
+  }
+
+  #passTurns() {
+    this.attacksNow.name === 'Human'
+      ? (this.attacksNow = this.playerTwo)
+      : (this.attacksNow = this.playerOne);
+  }
+
+  #findBoardWithGameOver() {
+    if (this.humanBoard.gameOver) {
+      this.thereIsAWinner = this.playerTwo.name;
+      return true;
+    } else if (this.computerBoard.gameOver) {
+      this.thereIsAWinner = this.playerOne.name;
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  makeMove(...coordinates) {
+    if (this.thereIsAWinner) {
+      return 'Game over';
+    }
+
+    if (this.attacksNow.name === 'Human') {
+      const move = coordinates[0];
+      const x = Number(move[0]);
+      const y = Number(move[1]);
+      this.playerOne.attackOpponent(x, y);
+    } else if (this.attacksNow.name === 'Computer') {
+      this.playerTwo.attackOpponent();
+    }
+
+    // Immediately terminate the game here if there is a board with "gameOver" set to true
+    if (this.#findBoardWithGameOver()) {
+      return;
+    } else {
+      this.#passTurns();
+    }
+  }
+
+  getWhoseTurnItIs() {
+    return this.attacksNow.name;
+  }
+
+  getWinner() {
+    return this.thereIsAWinner;
   }
 }
