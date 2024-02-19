@@ -1,18 +1,18 @@
-import { startGame } from '../modules/gameController';
+import { GameLoop } from '../modules/gameLoop';
 
 describe('Test the game loop logic', () => {
   test('Game loop passes turns between players', () => {
-    const game = startGame();
+    const game = new GameLoop();
     expect(game.getWhoseTurnItIs()).toBe('Human');
 
-    game.makeMove();
+    expect(game.makeMove('11')).toBeTruthy();
     expect(game.getWhoseTurnItIs()).toBe('Computer');
-    game.makeMove();
+    expect(game.makeMove()).toBeTruthy();
     expect(game.getWhoseTurnItIs()).toBe('Human');
   });
 
-  test.only('Game loop terminates the game when there is a winner', () => {
-    const game = startGame();
+  test('Game loop terminates the game when there is a winner', () => {
+    const game = new GameLoop();
     expect(game.getWinner()).toBeFalsy();
 
     let humanMoves = [
@@ -55,6 +55,6 @@ describe('Test the game loop logic', () => {
     expect(game.getWinner()).toBeTruthy();
     expect(game.getWinner()).toBe('Human');
     expect(game.getWhoseTurnItIs()).not.toBe('Computer');
-    expect(game.makeMove()).toBe('Game over');
+    expect(game.makeMove()).toBeFalsy();
   });
 });

@@ -54,29 +54,26 @@ class GameLoop {
 
   makeMove(...coordinates) {
     if (this.thereIsAWinner) {
-      return 'Game over';
+      return false;
     }
 
     if (this.attacksNow.name === 'Human') {
       const move = coordinates[0];
       const x = Number(move[0]);
       const y = Number(move[1]);
-      console.log(`Attacking at [${x}, ${y}]`);
-      if (this.playerOne.attackOpponent(x, y) !== 'Success') {
-        console.log('Move failed. Try again.');
-        return false;
-      }
+      // Check if move was successful. If not repeat it again??
+      this.playerOne.attackOpponent(x, y);
     } else if (this.attacksNow.name === 'Computer') {
       this.playerTwo.attackOpponent();
     }
 
     // Immediately terminate the game here if there is a board with "gameOver" set to true
     if (this.#findBoardWithGameOver()) {
-      return;
+      return false;
+    } else {
+      this.#passTurns();
+      return true;
     }
-
-    this.#passTurns();
-    return true;
   }
 
   getWhoseTurnItIs() {
@@ -86,20 +83,4 @@ class GameLoop {
   getWinner() {
     return this.thereIsAWinner;
   }
-
-  // getOwnBoard(player) {
-  //   if (player === 'Human') {
-  //     return this.humanBoard;
-  //   } else if (player === 'Computer') {
-  //     return this.computerBoard;
-  //   }
-  // }
-
-  // getEnemyBoard(player) {
-  //   if (player === 'Human') {
-  //     return this.computerBoard;
-  //   } else if (player === 'Computer') {
-  //     return this.humanBoard;
-  //   }
-  // }
 }

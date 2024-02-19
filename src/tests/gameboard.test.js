@@ -8,7 +8,7 @@ describe.skip('Test the public placeShip() method of the gameboard', () => {
     expect(gameboard.getInfoAtBoardCoordinates(0, 0).containsShip).toBeFalsy();
 
     // Act
-    gameboard.placeShip(0, 0, 1);
+    expect(gameboard.placeShip(0, 0, 1)).toBeTruthy();
 
     // Assert
     expect(gameboard.getInfoAtBoardCoordinates(0, 0).containsShip).toBeTruthy();
@@ -18,7 +18,7 @@ describe.skip('Test the public placeShip() method of the gameboard', () => {
     const gameboard = new Gameboard();
     expect(gameboard.getInfoAtBoardCoordinates(3, 4).containsShip).toBeFalsy();
 
-    gameboard.placeShip(3, 4, 3);
+    expect(gameboard.placeShip(3, 4, 3)).toBeTruthy();
 
     expect(gameboard.getInfoAtBoardCoordinates(3, 4).containsShip).toBeTruthy();
     expect(gameboard.getInfoAtBoardCoordinates(4, 4).containsShip).toBeTruthy();
@@ -39,15 +39,9 @@ describe.skip('Test the public placeShip() method of the gameboard', () => {
   test('placeShip() cannot place ships outside the board', () => {
     const gameboard = new Gameboard();
 
-    expect(gameboard.placeShip(-1, -1, 1)).toBe(
-      'Cannot place the ship outside the board'
-    );
-    expect(gameboard.placeShip(9, 0, 3, 'hor')).toBe(
-      'Cannot place the ship outside the board'
-    );
-    expect(gameboard.placeShip(0, 9, 2, 'ver')).toBe(
-      'Cannot place the ship outside the board'
-    );
+    expect(gameboard.placeShip(-1, -1, 1)).toBeFalsy();
+    expect(gameboard.placeShip(9, 0, 3, 'hor')).toBeFalsy();
+    expect(gameboard.placeShip(0, 9, 2, 'ver')).toBeFalsy();
   });
 
   test('placeShip() cannot place a ship in squares occupied by another ship', () => {
@@ -57,15 +51,9 @@ describe.skip('Test the public placeShip() method of the gameboard', () => {
     gameboard.placeShip(3, 4, 3);
     gameboard.placeShip(0, 7, 2);
 
-    expect(gameboard.placeShip(0, 0, 3)).toBe(
-      'Cannot place the ship in squares taken by another ship'
-    );
-    expect(gameboard.placeShip(5, 4, 1)).toBe(
-      'Cannot place the ship in squares taken by another ship'
-    );
-    expect(gameboard.placeShip(0, 5, 4, 'ver')).toBe(
-      'Cannot place the ship in squares taken by another ship'
-    );
+    expect(gameboard.placeShip(0, 0, 3)).toBeFalsy();
+    expect(gameboard.placeShip(5, 4, 1)).toBeFalsy();
+    expect(gameboard.placeShip(0, 5, 4, 'ver')).toBeFalsy();
   });
 
   test('placeShip() cannot place ships next to each other. Min gap must be 1 square', () => {
@@ -75,51 +63,9 @@ describe.skip('Test the public placeShip() method of the gameboard', () => {
     gameboard.placeShip(3, 4, 3, 'hor');
     gameboard.placeShip(8, 8, 2, 'ver');
 
-    expect(gameboard.placeShip(1, 1, 4)).toBe(
-      'Cannot place the ship right beside another ship'
-    );
-    expect(gameboard.placeShip(3, 5, 1)).toBe(
-      'Cannot place the ship right beside another ship'
-    );
-    expect(gameboard.placeShip(8, 5, 3, 'ver')).toBe(
-      'Cannot place the ship right beside another ship'
-    );
-  });
-
-  test('placeShip() cannot place ships of length greater than 4 or smaller than 1', () => {
-    const gameboard = new Gameboard();
-
-    expect(gameboard.placeShip(1, 1, 0)).toBe(
-      'Cannot place a ship of this length. Min length is 1. Max length is 4'
-    );
-
-    expect(gameboard.placeShip(3, 3, 5)).toBe(
-      'Cannot place a ship of this length. Min length is 1. Max length is 4'
-    );
-  });
-
-  test('placeShip() cannot place more than 10 ships on the board', () => {
-    const gameboard = new Gameboard();
-    expect(gameboard.getAllShips().length).toBe(0);
-
-    let x = 0;
-    let y = 0;
-    let counter = 10;
-    while (counter) {
-      gameboard.placeShip(x, y, 1);
-      x += 2;
-      counter--;
-
-      if (counter === 5) {
-        x = 0;
-        y = 3;
-      }
-    }
-
-    expect(gameboard.getAllShips().length).toBe(10);
-    expect(gameboard.placeShip(0, 6, 1)).toBe(
-      'There are 10 ships on the board. The limit is reached'
-    );
+    expect(gameboard.placeShip(1, 1, 4)).toBeFalsy();
+    expect(gameboard.placeShip(3, 5, 1)).toBeFalsy();
+    expect(gameboard.placeShip(8, 5, 3, 'ver')).toBeFalsy();
   });
 });
 
@@ -128,15 +74,11 @@ describe.skip('Test the public placeShip() method of the gameboard', () => {
 // ***
 
 describe.skip('Test the public receiveAttack() method of the gameboard', () => {
-  test('receiveAttack() cannot targer coordinates outside the board', () => {
+  test('receiveAttack() cannot target coordinates outside the board', () => {
     const gameboard = new Gameboard();
 
-    expect(gameboard.receiveAttack(-1, -5)).toBe(
-      'Cannot target non-existent coordinates'
-    );
-    expect(gameboard.receiveAttack(10, 5)).toBe(
-      'Cannot target non-existent coordinates'
-    );
+    expect(gameboard.receiveAttack(-1, -5)).toBeFalsy();
+    expect(gameboard.receiveAttack(10, 5)).toBeFalsy();
   });
 
   test('receiveAttack() targets specific coordinates of the board, which can either target a ship or turn out missed shots', () => {
@@ -148,8 +90,8 @@ describe.skip('Test the public receiveAttack() method of the gameboard', () => {
       gameboard.getInfoAtBoardCoordinates(5, 7).hasBeenTargetted
     ).toBeFalsy();
 
-    gameboard.receiveAttack(0, 0);
-    gameboard.receiveAttack(5, 7);
+    expect(gameboard.receiveAttack(0, 0)).toBeTruthy();
+    expect(gameboard.receiveAttack(5, 7)).toBeTruthy();
 
     expect(
       gameboard.getInfoAtBoardCoordinates(0, 0).hasBeenTargetted
@@ -165,12 +107,8 @@ describe.skip('Test the public receiveAttack() method of the gameboard', () => {
     gameboard.receiveAttack(1, 1);
     gameboard.receiveAttack(3, 9);
 
-    expect(gameboard.receiveAttack(1, 1)).toBe(
-      'Coordinates have been targetted already'
-    );
-    expect(gameboard.receiveAttack(3, 9)).toBe(
-      'Coordinates have been targetted already'
-    );
+    expect(gameboard.receiveAttack(1, 1)).toBeFalsy();
+    expect(gameboard.receiveAttack(3, 9)).toBeFalsy();
   });
 
   test('receiveAttack() calls hit(), which modifies the number of hits on the ship', () => {
@@ -221,18 +159,10 @@ describe.skip('Test the public receiveAttack() method of the gameboard', () => {
     gameboard.receiveAttack(9, 1);
     gameboard.receiveAttack(4, 4);
 
-    expect(gameboard.receiveAttack(5, 4)).toBe(
-      'Another sunk ship has made these coordinates unavailable'
-    );
-    expect(gameboard.receiveAttack(4, 3)).toBe(
-      'Another sunk ship has made these coordinates unavailable'
-    );
-    expect(gameboard.receiveAttack(9, 2)).toBe(
-      'Another sunk ship has made these coordinates unavailable'
-    );
-    expect(gameboard.receiveAttack(8, 0)).toBe(
-      'Another sunk ship has made these coordinates unavailable'
-    );
+    expect(gameboard.receiveAttack(5, 4)).toBeFalsy();
+    expect(gameboard.receiveAttack(4, 3)).toBeFalsy();
+    expect(gameboard.receiveAttack(9, 2)).toBeFalsy();
+    expect(gameboard.receiveAttack(8, 0)).toBeFalsy();
   });
 
   test('receiveAttack() does not allow attacks if game over', () => {
@@ -266,6 +196,6 @@ describe.skip('Test the public receiveAttack() method of the gameboard', () => {
       gameboard.getInfoAtBoardCoordinates(5, 6).hasBeenTargetted
     ).toBeTruthy();
     gameboard.receiveAttack(8, 3);
-    expect(gameboard.receiveAttack(8, 8)).toBe('Game over');
+    expect(gameboard.receiveAttack(8, 8)).toBeFalsy();
   });
 });

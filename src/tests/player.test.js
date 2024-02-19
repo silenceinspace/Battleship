@@ -57,6 +57,6 @@ describe.skip('Player objects are instantiated and hold two boards', () => {
       computer.attackOpponent();
     }
 
-    expect(computer.attackOpponent()).toBe('There are no possible moves left');
+    expect(computer.attackOpponent()).toBeFalsy();
   });
 });

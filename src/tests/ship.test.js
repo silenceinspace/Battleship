@@ -26,7 +26,7 @@ describe.skip('Test public interface of a Ship class', () => {
     const ship = new Ship(1);
 
     ship.hit();
-    expect(ship.hit()).toBe('Cannot hit the ship. It is sunk already');
+    expect(ship.hit()).toBeFalsy();
   });
 
   test('hit() works with ships of all lengths even though the game features only 4 types of ships', () => {

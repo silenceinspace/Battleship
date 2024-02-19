@@ -8,7 +8,7 @@ class Player {
   }
 
   attackOpponent(x, y) {
-    return this.enemyBoard.receiveAttack(x, y);
+    this.enemyBoard.receiveAttack(x, y);
   }
 }
 
@@ -33,14 +33,13 @@ class Computer extends Player {
 
   attackOpponent() {
     if (!this.possibleMoves.length) {
-      return 'There are no possible moves left';
+      return false;
     }
 
     const randomIndex = Math.floor(Math.random() * this.possibleMoves.length);
     const x = Number(this.possibleMoves[randomIndex][0]);
     const y = Number(this.possibleMoves[randomIndex][1]);
 
-    console.log(`Attacking at [${x}, ${y}]`);
     this.enemyBoard.receiveAttack(x, y);
     this.possibleMoves = this.possibleMoves.filter((move) => {
       return move !== `${x}${y}`;

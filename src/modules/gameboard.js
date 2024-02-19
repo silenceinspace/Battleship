@@ -130,30 +130,20 @@ class Gameboard {
     }
   }
 
-  #checkIfMaxNumberOfShipsIsReached() {
-    if (this.allShips.length >= 10) {
-      return true;
-    } else {
+  #compareAgainstLimitConditions(x, y) {
+    if (!this.#fitInBoardLimits(x, y)) {
       return false;
-    }
-  }
-
-  #limitPossibleLengthOfShips(ship) {
-    if (ship.length < 1 || ship.length > 4) {
-      return true;
-    } else {
+    } else if (this.#confirmCoordinatesAreNotAvailable(x, y)) {
       return false;
+    } else if (this.#standInAnotherShipAdjacentSquares(x, y)) {
+      return false;
+    } else {
+      return true;
     }
   }
 
   placeShip(x, y, shipSize, direction = 'hor') {
     const ship = new Ship(shipSize);
-
-    if (this.#checkIfMaxNumberOfShipsIsReached()) {
-      return 'There are 10 ships on the board. The limit is reached';
-    } else if (this.#limitPossibleLengthOfShips(ship)) {
-      return 'Cannot place a ship of this length. Min length is 1. Max length is 4';
-    }
 
     if (ship.length > 1) {
       // Create two arrays to place ships over multiple squares, doing it in both directions
@@ -176,20 +166,11 @@ class Gameboard {
         }
       }
 
-      // Check if any of these restrictions is violated before placing a ship. If yes, the ship is not placed on the board
-      if (!this.#fitInBoardLimits(allValuesOfX, allValuesOfY)) {
-        return 'Cannot place the ship outside the board';
-      } else if (
-        this.#confirmCoordinatesAreNotAvailable(allValuesOfX, allValuesOfY)
-      ) {
-        return 'Cannot place the ship in squares taken by another ship';
-      } else if (
-        this.#standInAnotherShipAdjacentSquares(allValuesOfX, allValuesOfY)
-      ) {
-        return 'Cannot place the ship right beside another ship';
+      // Check if any of the restrictions is violated before placing a ship. If yes, the ship is not placed on the board
+      if (!this.#compareAgainstLimitConditions(allValuesOfX, allValuesOfY)) {
+        return false;
       }
 
-      // Make sure there is one square of a gap between two ships (in all directions)
       for (let i = 0; i < ship.length; i++) {
         this.getInfoAtBoardCoordinates(
           allValuesOfX[i],
@@ -218,18 +199,16 @@ class Gameboard {
         );
       }
     } else if (ship.length === 1) {
-      if (this.#standInAnotherShipAdjacentSquares(x, y)) {
-        return 'Cannot place the ship right beside another ship';
-      } else if (!this.#fitInBoardLimits(x, y)) {
-        return 'Cannot place the ship outside the board';
-      } else if (this.#confirmCoordinatesAreNotAvailable(x, y)) {
-        return 'Cannot place the ship in squares taken by another ship';
+      if (!this.#compareAgainstLimitConditions(x, y)) {
+        return false;
       }
 
       this.getInfoAtBoardCoordinates(x, y).containsShip = ship;
       this.#reserveAdjacentSquares(x, y, 'isAdjacentToSomeShip');
       this.allShips.push({ shipInstance: ship, coordinates: [x, y] });
     }
+    // To confirm that the ship has been placed successfully
+    return true;
   }
 
   // Helpers for receiveAttack()
@@ -245,22 +224,13 @@ class Gameboard {
     }
   }
 
-  #confirmSquareHasBeenTargettedAlready(arrayWithCoordinates) {
+  #confirmSquaresAreNotAvailable(arrayWithCoordinates) {
     const x = arrayWithCoordinates[0];
     const y = arrayWithCoordinates[1];
 
     if (this.getInfoAtBoardCoordinates(x, y).hasBeenTargetted) {
       return true;
-    } else {
-      return false;
-    }
-  }
-
-  #confirmSquareIsDisabledByAnotherShip(arrayWithCoordinates) {
-    const x = arrayWithCoordinates[0];
-    const y = arrayWithCoordinates[1];
-
-    if (this.getInfoAtBoardCoordinates(x, y).isAdjacentToSomeSunkShip) {
+    } else if (this.getInfoAtBoardCoordinates(x, y).isAdjacentToSomeSunkShip) {
       return true;
     } else {
       return false;
@@ -272,10 +242,8 @@ class Gameboard {
     const y = arrayWithCoordinates[1];
 
     if (this.getInfoAtBoardCoordinates(x, y).containsShip) {
-      console.log('Hit an enemy ship!!!');
       return true;
     } else {
-      console.log('Missed shot!!!');
       return false;
     }
   }
@@ -298,29 +266,29 @@ class Gameboard {
     }
   }
 
+  #checkIfAttackIsAllowed(arrayWithCoordinates) {
+    if (this.#checkGameState()) {
+      return false;
+    } else if (this.#targetCoordinatesOutsideBoard(arrayWithCoordinates)) {
+      return false;
+    } else if (this.#confirmSquaresAreNotAvailable(arrayWithCoordinates)) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
   receiveAttack(...pairOfCoordinates) {
     const arrayWithCoordinates = pairOfCoordinates;
     const x = arrayWithCoordinates[0];
     const y = arrayWithCoordinates[1];
 
-    if (this.#checkGameState()) {
-      return 'Game over';
-    } else if (this.#targetCoordinatesOutsideBoard(arrayWithCoordinates)) {
-      return 'Cannot target non-existent coordinates';
-    } else if (
-      this.#confirmSquareHasBeenTargettedAlready(arrayWithCoordinates)
-    ) {
-      return 'Coordinates have been targetted already';
-    } else if (
-      this.#confirmSquareIsDisabledByAnotherShip(arrayWithCoordinates)
-    ) {
-      return 'Another sunk ship has made these coordinates unavailable';
+    if (!this.#checkIfAttackIsAllowed(arrayWithCoordinates)) {
+      return false;
     }
 
-    // Target the provided square successfully only if none of the above conditions terminates this method
-    this.getInfoAtBoardCoordinates(x, y).hasBeenTargetted = true;
-
     // hasBeenTargetted property can either mean a successful attack (hit a ship) or a failed one (a missed shot)
+    this.getInfoAtBoardCoordinates(x, y).hasBeenTargetted = true;
     if (this.#findTargettedShip(arrayWithCoordinates)) {
       const targettedShip = this.getSpecificShip(x, y);
       targettedShip.hit();
@@ -345,12 +313,11 @@ class Gameboard {
             );
           }
         }
-
         // Gameboard should keep track of its termination state because GameLoop will rely on it later
         this.#checkIfAllShipsHaveBeenDestroyed();
       }
     }
-    return 'Success';
+    return true;
   }
 
   getInfoAtBoardCoordinates(x, y) {

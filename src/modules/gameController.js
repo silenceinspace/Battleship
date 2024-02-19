@@ -1,5 +1,5 @@
+/*
 import { GameLoop } from './gameLoop';
-// export { startGame };
 
 const fieldForX = document.querySelector('#x-value');
 const fieldForY = document.querySelector('#y-value');
@@ -44,3 +44,5 @@ function play() {
 // Console log if the attack hit a ship or is a missed shot
 // console.log('Game over...');
 // console.log('Winner is Human/Computer...');
+
+*/
