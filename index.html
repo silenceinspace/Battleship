@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Battleship</title>
+    <script src="main.js" defer></script>
+    <style>
+      * {
+        padding: 0;
+        margin: 0;
+        box-sizing: border-box;
+      }
+
+      .game-flow {
+        background-color: green;
+        width: 300px;
+        height: 300px;
+        padding: 15px;
+      }
+
+      .interactable-block {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 20px;
+        margin-top: 30px;
+      }
+
+      input {
+        appearance: none;
+        width: 50px;
+        height: 50px;
+        border: none;
+        font-size: 30px;
+        padding: 5px;
+      }
+
+      label {
+        font-size: 30px;
+        color: orange;
+        font-weight: bold;
+      }
+
+      button {
+        padding: 10px 20px;
+        border: none;
+        appearance: none;
+        color: orange;
+        font-size: 20px;
+        font-weight: bold;
+        background-color: grey;
+        border-radius: 15px;
+      }
+
+      button:hover {
+        cursor: pointer;
+        text-decoration: underline;
+        color: red;
+      }
+
+      .start-game-button {
+        display: block;
+        margin: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="game-flow">
+      <button class="start-game-button">New game</button>
+      <form class="interactable-block">
+        <p>
+          <label for="x-value">X:</label>
+          <input
+            class="x-coordinate"
+            id="x-value"
+            type="number"
+            min="0"
+            max="9"
+          />
+        </p>
+        <p>
+          <label for="y-value">Y:</label>
+          <input
+            class="y-coordinate"
+            id="y-value"
+            type="number"
+            min="0"
+            max="9"
+          />
+        </p>
+        <button class="confirm-button" type="button">Confirm</button>
+      </form>
+    </div>
+  </body>
+</html>
