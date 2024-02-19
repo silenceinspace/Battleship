@@ -1,20 +1,46 @@
 import { GameLoop } from './gameLoop';
-export { startGame };
+// export { startGame };
 
-const startGame = () => {
-  console.log('Start a new game...');
+const fieldForX = document.querySelector('#x-value');
+const fieldForY = document.querySelector('#y-value');
+const confirmButton = document.querySelector('.confirm-button');
+const formBlock = document.querySelector('form');
+const newGameButton = document.querySelector('.start-game-button');
+newGameButton.addEventListener('click', () => {
+  startGame();
+});
 
-  const gameLoop = new GameLoop();
-  console.log('Two new players and their boards are created...');
+let gameLoop = null;
+function startGame() {
+  console.log('Starting game...');
 
-  return gameLoop;
-};
+  gameLoop = new GameLoop();
+  console.log('Players and boards are being created...');
 
-// console.log('It is the first player turn...');
-// Make an attack through a prompt window or calling a function in the console
+  confirmButton.addEventListener('click', play);
+}
+
+function play() {
+  let currentPlayer;
+
+  // Player makes a move
+  currentPlayer = gameLoop.getWhoseTurnItIs();
+  console.log(`It is ${currentPlayer}'s move`);
+  const x = fieldForX.value;
+  const y = fieldForY.value;
+  formBlock.reset();
+  if (!gameLoop.makeMove(`${x}${y}`)) {
+    play();
+  }
+  console.log('Turn has been passed by PlayerOne');
+
+  // Computer makes an immediate move
+  currentPlayer = gameLoop.getWhoseTurnItIs();
+  console.log(`It is ${currentPlayer}'s move`);
+  gameLoop.makeMove();
+  console.log('Turn has been passed by PlayerTwo');
+}
+
 // Console log if the attack hit a ship or is a missed shot
-// console.log('The turn has been passed...');
-// console.log('It is the second player turn...');
 // console.log('Game over...');
 // console.log('Winner is Human/Computer...');
-// After that it is not possible to attack or do anything except for startning a new game

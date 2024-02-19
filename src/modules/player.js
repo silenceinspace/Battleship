@@ -8,7 +8,7 @@ class Player {
   }
 
   attackOpponent(x, y) {
-    this.enemyBoard.receiveAttack(x, y);
+    return this.enemyBoard.receiveAttack(x, y);
   }
 }
 
@@ -40,6 +40,7 @@ class Computer extends Player {
     const x = Number(this.possibleMoves[randomIndex][0]);
     const y = Number(this.possibleMoves[randomIndex][1]);
 
+    console.log(`Attacking at [${x}, ${y}]`);
     this.enemyBoard.receiveAttack(x, y);
     this.possibleMoves = this.possibleMoves.filter((move) => {
       return move !== `${x}${y}`;

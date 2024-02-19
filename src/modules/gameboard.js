@@ -272,8 +272,10 @@ class Gameboard {
     const y = arrayWithCoordinates[1];
 
     if (this.getInfoAtBoardCoordinates(x, y).containsShip) {
+      console.log('Hit an enemy ship!!!');
       return true;
     } else {
+      console.log('Missed shot!!!');
       return false;
     }
   }
@@ -348,6 +350,7 @@ class Gameboard {
         this.#checkIfAllShipsHaveBeenDestroyed();
       }
     }
+    return 'Success';
   }
 
   getInfoAtBoardCoordinates(x, y) {
@@ -384,14 +387,3 @@ class Gameboard {
     return ship[0][property];
   }
 }
-
-/* For future reflections:
-
-1. Is it necessary to duplicate 90% of a function's body to specify the exact case? Or is it more appropriate to host all restraints under one umbrella and put in else if statements instead?
-Could these be not 3 methods but 1?
-- confirmSquareHasBeenTargettedAlready();
-- confirmSquareIsDisabledByAnotherShip();
-- findTargettedShip();
-
-2. How should methods/functions be named? Should they start with a verb all the time? Should they directly represent their meaning — "confirmCoordinatesAreAvailable()" + true/false to naturally call something else depending on the result instead of "checkIfCoordinatesAreAvailable()"
-*/
