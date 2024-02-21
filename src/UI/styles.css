@@ -1,0 +1,132 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: skyblue;
+  min-height: 100vh;
+}
+
+#container {
+  display: grid;
+  grid-template-rows: 100px 1fr;
+
+  padding: 25px 50px;
+  width: 900px;
+  margin: auto;
+}
+
+#container .top-part {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+button {
+  appearance: none;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 15px;
+  color: purple;
+}
+
+button:hover {
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.start-game-button {
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+#container .main-part {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 50px;
+}
+
+.left-part,
+.right-part {
+  display: grid;
+  grid-template-rows: 80px 350px;
+
+  background-color: grey;
+  position: relative;
+}
+
+.left-part > p,
+.right-part > p {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: white;
+  place-self: center;
+}
+
+.numerical-marks {
+  display: grid;
+  grid-template-rows: repeat(10, 1fr);
+  justify-items: center;
+
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: orange;
+  position: absolute;
+  top: 115px;
+  left: 20px;
+  height: 280px;
+}
+
+.char-marks {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  justify-items: center;
+
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: orange;
+  position: absolute;
+  top: 90px;
+  left: 47px;
+  width: 280px;
+}
+
+.board-grid {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  grid-template-rows: repeat(10, 1fr);
+
+  width: 280px;
+  height: 280px;
+  background-color: black;
+  place-self: center;
+  gap: 2px;
+  border: 2px solid black;
+}
+
+.cell {
+  background-color: white;
+}
+
+/* .board-ships-info {
+  align-self: center;
+  justify-self: center;
+} */
+
+/* .left-part .board-ships-info {
+  grid-column: 1/2;
+  grid-row: 2/3;
+}
+
+.right-part .board-ships-info {
+  grid-column: 2/3;
+  grid-row: 2/3;
+} */
+
+.board-ships-info p {
+  font-size: 1.7rem;
+  font-weight: bold;
+  color: black;
+}
