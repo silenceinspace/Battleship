@@ -1,6 +1,6 @@
 import { Ship } from '../modules/ship';
 
-describe.skip('Test public interface of a Ship class', () => {
+describe('Test public interface of a Ship class', () => {
   test('hit() increments the number of hits the ship has received', () => {
     const ship = new Ship(2);
     expect(ship.getTimesHitProperty()).toBe(0);
