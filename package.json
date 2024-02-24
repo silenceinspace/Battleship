@@ -4,10 +4,10 @@
   "description": "project develop using TDD",
   "private": true,
   "scripts": {
-    "watch": "jest --watch",
-    "build": "webpack",
     "test": "jest",
-    "dynamic-build": "webpack --watch"
+    "watchTest": "jest --watch",
+    "build": "webpack",
+    "dynamicBuild": "webpack --watch"
   },
   "keywords": [],
   "author": "",

@@ -65,8 +65,8 @@ button:hover {
   place-self: center;
 }
 
-.numerical-marks,
-.letter-marks {
+.number-board-indexes,
+.letter-board-indexes {
   display: grid;
   gap: 2px;
   justify-items: center;
@@ -77,7 +77,7 @@ button:hover {
   position: absolute;
 }
 
-.numerical-marks {
+.number-board-indexes {
   grid-template-rows: repeat(10, 30px);
   grid-auto-columns: 30px;
 
@@ -85,7 +85,7 @@ button:hover {
   left: 20px;
 }
 
-.letter-marks {
+.letter-board-indexes {
   grid-template-columns: repeat(10, 30px);
   grid-auto-rows: 30px;
 
@@ -104,11 +104,28 @@ button:hover {
   border: 2px solid black;
 }
 
-.cell {
+.square {
   background-color: white;
 }
 
-.cell:hover {
+.square.contains-ship {
+  background-color: green;
+}
+
+.square.disabled {
+  background-color: grey;
+}
+
+.square.active:hover {
   cursor: pointer;
+  background-color: orange;
+}
+
+.square.missed-shot {
+  background-color: blue;
+}
+
+.square.successful-shot {
   background-color: red;
 }
+/* .adjacent-to-sunk-ship */

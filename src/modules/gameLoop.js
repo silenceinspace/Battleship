@@ -4,8 +4,8 @@ export { GameLoop };
 
 class GameLoop {
   constructor() {
-    this.humanBoard = this.#populateBoardWithShips();
-    this.computerBoard = this.#populateBoardWithShips();
+    this.humanBoard = this.#populateBoardWithShips('Human');
+    this.computerBoard = this.#populateBoardWithShips('Computer');
     this.playerOne = new Player('Human', this.humanBoard, this.computerBoard);
     this.playerTwo = new Computer(
       'Computer',
@@ -17,19 +17,32 @@ class GameLoop {
   }
 
   // Place 10 ships at pretedermined coodinates for now
-  #populateBoardWithShips() {
+  #populateBoardWithShips(player) {
     const board = new Gameboard();
 
-    board.placeShip(0, 0, 1);
-    board.placeShip(9, 9, 1);
-    board.placeShip(0, 9, 1);
-    board.placeShip(9, 0, 1);
-    board.placeShip(2, 2, 2, 'ver');
-    board.placeShip(4, 2, 2, 'ver');
-    board.placeShip(6, 2, 2, 'hor');
-    board.placeShip(0, 5, 3, 'hor');
-    board.placeShip(4, 5, 3, 'hor');
-    board.placeShip(8, 4, 4, 'ver');
+    if (player === 'Human') {
+      board.placeShip(1, 0, 1);
+      board.placeShip(2, 9, 1);
+      board.placeShip(5, 9, 1);
+      board.placeShip(9, 9, 1);
+      board.placeShip(7, 0, 2, 'hor');
+      board.placeShip(4, 4, 2, 'ver');
+      board.placeShip(6, 4, 2, 'ver');
+      board.placeShip(3, 0, 3, 'hor');
+      board.placeShip(9, 2, 3, 'ver');
+      board.placeShip(0, 3, 4, 'ver');
+    } else if (player === 'Computer') {
+      board.placeShip(0, 0, 1);
+      board.placeShip(9, 9, 1);
+      board.placeShip(0, 9, 1);
+      board.placeShip(9, 0, 1);
+      board.placeShip(2, 2, 2, 'ver');
+      board.placeShip(4, 2, 2, 'ver');
+      board.placeShip(6, 2, 2, 'hor');
+      board.placeShip(0, 5, 3, 'hor');
+      board.placeShip(4, 5, 3, 'hor');
+      board.placeShip(8, 4, 4, 'ver');
+    }
 
     return board;
   }
@@ -62,18 +75,23 @@ class GameLoop {
       const x = Number(move[0]);
       const y = Number(move[1]);
       // Check if move was successful. If not repeat it again??
-      this.playerOne.attackOpponent(x, y);
+      if (!this.playerOne.attackOpponent(x, y)) {
+        return false;
+      } else {
+        return true;
+      }
     } else if (this.attacksNow.name === 'Computer') {
       this.playerTwo.attackOpponent();
     }
 
     // Immediately terminate the game here if there is a board with "gameOver" set to true
-    if (this.#findBoardWithGameOver()) {
-      return false;
-    } else {
-      this.#passTurns();
-      return true;
-    }
+
+    // if (this.#findBoardWithGameOver()) {
+    //   return false;
+    // } else {
+    //   this.#passTurns();
+    //   return true;
+    // }
   }
 
   getWhoseTurnItIs() {
@@ -82,5 +100,13 @@ class GameLoop {
 
   getWinner() {
     return this.thereIsAWinner;
+  }
+
+  getHumanBoard() {
+    return this.humanBoard.board;
+  }
+
+  getComputerBoard() {
+    return this.computerBoard.board;
   }
 }

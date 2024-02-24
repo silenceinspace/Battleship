@@ -8,7 +8,7 @@ class Player {
   }
 
   attackOpponent(x, y) {
-    this.enemyBoard.receiveAttack(x, y);
+    return this.enemyBoard.receiveAttack(x, y);
   }
 }
 
