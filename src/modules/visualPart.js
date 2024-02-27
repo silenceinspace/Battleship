@@ -1,6 +1,7 @@
 import { GameLoop } from './gameLoop';
 export { generateGrid };
 
+// Select DOM elements
 const startGameButton = document.querySelector('.start-game-button');
 const grids = document.querySelectorAll('.board-grid');
 const numberGridIndexes = document.querySelectorAll('.number-board-indexes');
@@ -71,6 +72,9 @@ function registerClicksOnBoards(event) {
       return classValue.length === 2 ? true : false;
     });
 
+    // Before the attack look at the sunkShips property and compare it with the state of the board after the attack
+    const sunkShipsArray = game.getPlayerTwoSunkShips().length;
+
     const currentAttack = game.makeMove(getSquareId[0]);
     if (!currentAttack) {
       console.log('Attack cannot be registered. Repeat again');
@@ -79,16 +83,19 @@ function registerClicksOnBoards(event) {
       console.log('Attack was registered');
     }
 
-    // Reflect a missed/succesful shot + sun ships disable adjacent squares (visually show it)
+    // Confirm if attack hit a ship or is a missed shot
+    if (isInsideSquare.classList.contains('contains-ship')) {
+      isInsideSquare.classList.add('successful-shot');
+      console.log('Hit a ship!!');
 
-    // if (isInsideSquare.classList.contains('contains-ship')) {
-    //   isInsideSquare.classList.add('successful-shot');
-    //   console.log('Hit a ship!!');
-    // } else {
-    //   isInsideSquare.classList.add('missed-shot');
-    //   console.log('Missed shot!!');
-    // }
-    // console.log(game.getComputerBoard());
+      if (sunkShipsArray !== game.getPlayerTwoSunkShips().length) {
+        console.log('Sink the ship!');
+        disableAdjacentSquaresToSunkShips(game);
+      }
+    } else {
+      isInsideSquare.classList.add('missed-shot');
+      console.log('Missed shot!!');
+    }
   }
 }
 
@@ -101,7 +108,7 @@ function startGame() {
     console.log('Starting game...');
     game = new GameLoop();
     addHoverEffectToGridSquares(grids);
-    displayShipsOnBoards(game);
+    displayShipsOnBoards();
   } else if (statusOfButton.contains('started')) {
     const confirmMessage = confirm('Do you really want to start a new game?');
     if (confirmMessage) {
@@ -128,6 +135,10 @@ function clearPreviousBoardsVisuals(boards) {
       if (classValues.contains('successful-shot')) {
         square.classList.remove('successful-shot');
       }
+
+      if (classValues.contains('adjacent-to-sunk-ship')) {
+        square.classList.remove('adjacent-to-sunk-ship');
+      }
     });
   });
 }
@@ -141,7 +152,7 @@ function addHoverEffectToGridSquares(divs) {
   });
 }
 
-function displayShipsOnBoards(currentGame) {
+function loopOverAllDivsAndArraySquares(currentGame, property) {
   const humanGridDivs = [...gridSquaresHuman.children];
   const computerGridDivs = [...gridSquaresComputer.children];
   const humanBoard = currentGame.getHumanBoard();
@@ -153,19 +164,39 @@ function displayShipsOnBoards(currentGame) {
       const computerSquare = boardComputer[j][i][0];
       const humanSquare = humanBoard[j][i][0];
 
-      if (computerSquare.containsShip) {
-        computerGridDivs[counterForArrayWithDivs].classList.add(
-          'contains-ship'
-        );
+      if (computerSquare[property]) {
+        if (property === 'containsShip') {
+          computerGridDivs[counterForArrayWithDivs].classList.add(
+            'contains-ship'
+          );
+        } else if (property === 'isAdjacentToSomeSunkShip') {
+          computerGridDivs[counterForArrayWithDivs].classList.add(
+            'adjacent-to-sunk-ship'
+          );
+        }
       }
 
-      if (humanSquare.containsShip) {
-        humanGridDivs[counterForArrayWithDivs].classList.add(
-          'contains-ship'
-        );
-      }
+      /*       if (humanSquare[property]) {
+        if (property === 'containShip') {
+          humanGridDivs[counterForArrayWithDivs].classList.add(
+            'contains-ship'
+          );
+        } else if (property === 'isAdjacentToSomeSunkShip') {
+          humanGridDivs[counterForArrayWithDivs].classList.add(
+            'adjacent-to-sunk-ship'
+          );
+        }
+      } */
 
       counterForArrayWithDivs++;
     }
   }
+}
+
+function displayShipsOnBoards() {
+  loopOverAllDivsAndArraySquares(game, 'containsShip');
+}
+
+function disableAdjacentSquaresToSunkShips() {
+  loopOverAllDivsAndArraySquares(game, 'isAdjacentToSomeSunkShip');
 }

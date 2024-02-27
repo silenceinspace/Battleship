@@ -109,4 +109,12 @@ class GameLoop {
   getComputerBoard() {
     return this.computerBoard.board;
   }
+
+  getPlayerOneSunkShips() {
+    return this.playerOne.ownBoard.getSunkShipsProperty();
+  }
+
+  getPlayerTwoSunkShips() {
+    return this.playerTwo.ownBoard.getSunkShipsProperty();
+  }
 }

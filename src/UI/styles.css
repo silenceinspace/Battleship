@@ -122,10 +122,13 @@ button:hover {
 }
 
 .square.missed-shot {
-  background-color: blue;
+  background-color: grey;
 }
 
 .square.successful-shot {
   background-color: red;
 }
-/* .adjacent-to-sunk-ship */
+
+.square.adjacent-to-sunk-ship {
+  background-color: darkred;
+}
