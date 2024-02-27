@@ -77,21 +77,23 @@ class GameLoop {
       // Check if move was successful. If not repeat it again??
       if (!this.playerOne.attackOpponent(x, y)) {
         return false;
+      }
+
+      // Immediately terminate the game here if there is a board with "gameOver" set to true
+      if (this.#findBoardWithGameOver()) {
+        return false;
       } else {
+        this.#passTurns();
         return true;
       }
-    } else if (this.attacksNow.name === 'Computer') {
-      this.playerTwo.attackOpponent();
     }
 
-    // Immediately terminate the game here if there is a board with "gameOver" set to true
+    if (this.attacksNow.name === 'Computer') {
+      const computerMove = this.playerTwo.attackOpponent();
 
-    // if (this.#findBoardWithGameOver()) {
-    //   return false;
-    // } else {
-    //   this.#passTurns();
-    //   return true;
-    // }
+      this.#passTurns();
+      return computerMove.join('');
+    }
   }
 
   getWhoseTurnItIs() {

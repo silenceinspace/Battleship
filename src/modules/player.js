@@ -36,14 +36,20 @@ class Computer extends Player {
       return false;
     }
 
-    const randomIndex = Math.floor(Math.random() * this.possibleMoves.length);
-    const x = Number(this.possibleMoves[randomIndex][0]);
-    const y = Number(this.possibleMoves[randomIndex][1]);
+    let x;
+    let y;
+    let attemptedAttack;
 
-    this.enemyBoard.receiveAttack(x, y);
-    this.possibleMoves = this.possibleMoves.filter((move) => {
-      return move !== `${x}${y}`;
-    });
+    do {
+      const randomIndex = Math.floor(Math.random() * this.possibleMoves.length);
+      x = Number(this.possibleMoves[randomIndex][0]);
+      y = Number(this.possibleMoves[randomIndex][1]);
+
+      attemptedAttack = this.enemyBoard.receiveAttack(x, y);
+      this.possibleMoves = this.possibleMoves.filter((move) => {
+        return move !== `${x}${y}`;
+      });
+    } while (!attemptedAttack);
 
     return [x, y]; // Return an array of coordinates to pass a test that ensures Computer does hit the Player's board at the coordinates
   }

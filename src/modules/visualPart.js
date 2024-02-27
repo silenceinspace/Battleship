@@ -57,38 +57,41 @@ function generateGrid() {
 // Varible holding gameLoop object, updating its inner state with "Start game"
 let game = false;
 
+// Make sure that clicks are not registered by the player on its own board while playing against the computer (before starting a game, it is important to select a game mode — 2 players or player vs AI)
 grids.forEach((div) => {
   div.addEventListener('click', registerClicksOnBoards);
 });
 function registerClicksOnBoards(event) {
   if (!game) {
     console.log('Board is not active. Start game to active');
+    return;
+  }
+
+  console.log(`${game.getWhoseTurnItIs()} attacks now`);
+  // Apply event delegations to board grids
+  const isInsideSquare = event.target.closest('div.square');
+  if (!isInsideSquare) return;
+
+  const getSquareId = [...isInsideSquare.classList].filter((classValue) => {
+    return classValue.length === 2 ? true : false;
+  });
+
+  // Before the attack look at the sunkShips property and compare it with the state of the board after the attack
+  const sunkShipsOfPlayerTwo = game.getPlayerTwoSunkShips().length;
+
+  const playerAttack = game.makeMove(getSquareId[0]);
+  if (!playerAttack) {
+    console.log('Attack cannot be registered. Repeat again');
+    return;
   } else {
-    // Apply event delegations to board grids
-    const isInsideSquare = event.target.closest('div.square');
-    if (!isInsideSquare) return;
-
-    const getSquareId = [...isInsideSquare.classList].filter((classValue) => {
-      return classValue.length === 2 ? true : false;
-    });
-
-    // Before the attack look at the sunkShips property and compare it with the state of the board after the attack
-    const sunkShipsArray = game.getPlayerTwoSunkShips().length;
-
-    const currentAttack = game.makeMove(getSquareId[0]);
-    if (!currentAttack) {
-      console.log('Attack cannot be registered. Repeat again');
-      return;
-    } else {
-      console.log('Attack was registered');
-    }
+    console.log('Attack was registered');
 
     // Confirm if attack hit a ship or is a missed shot
     if (isInsideSquare.classList.contains('contains-ship')) {
       isInsideSquare.classList.add('successful-shot');
       console.log('Hit a ship!!');
 
-      if (sunkShipsArray !== game.getPlayerTwoSunkShips().length) {
+      if (sunkShipsOfPlayerTwo !== game.getPlayerTwoSunkShips().length) {
         console.log('Sink the ship!');
         disableAdjacentSquaresToSunkShips(game);
       }
@@ -96,6 +99,43 @@ function registerClicksOnBoards(event) {
       isInsideSquare.classList.add('missed-shot');
       console.log('Missed shot!!');
     }
+
+    hightlightComputerMoves();
+
+    // Game over
+    // if (game.getWinner()) {
+    //   console.log('GAME OVER!!!');
+    // }
+    // Allow the move that is a pre move to destroying all ships!!
+  }
+}
+
+function hightlightComputerMoves() {
+  console.log(`${game.getWhoseTurnItIs()} attacks now`);
+
+  const sunkShipsOfPlayerOne = game.getPlayerOneSunkShips().length;
+  const squareId = game.makeMove();
+  const squares = [...gridSquaresHuman.children];
+  let targettedSquare;
+
+  squares.forEach((square) => {
+    if (square.classList.contains(squareId)) {
+      targettedSquare = square;
+      console.log('Attack was registered...');
+    }
+  });
+
+  if (targettedSquare.classList.contains('contains-ship')) {
+    targettedSquare.classList.add('successful-shot');
+    console.log('Hit a ship!');
+
+    if (sunkShipsOfPlayerOne !== game.getPlayerOneSunkShips().length) {
+      console.log('Sink the ship!');
+      disableAdjacentSquaresToSunkShips(game);
+    }
+  } else {
+    targettedSquare.classList.add('missed-shot');
+    console.log('Missed shot!');
   }
 }
 
@@ -176,17 +216,15 @@ function loopOverAllDivsAndArraySquares(currentGame, property) {
         }
       }
 
-      /*       if (humanSquare[property]) {
-        if (property === 'containShip') {
-          humanGridDivs[counterForArrayWithDivs].classList.add(
-            'contains-ship'
-          );
+      if (humanSquare[property]) {
+        if (property === 'containsShip') {
+          humanGridDivs[counterForArrayWithDivs].classList.add('contains-ship');
         } else if (property === 'isAdjacentToSomeSunkShip') {
           humanGridDivs[counterForArrayWithDivs].classList.add(
             'adjacent-to-sunk-ship'
           );
         }
-      } */
+      }
 
       counterForArrayWithDivs++;
     }
