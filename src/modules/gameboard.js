@@ -279,9 +279,10 @@ class Gameboard {
   }
 
   receiveAttack(...pairOfCoordinates) {
+    // Convert arguments to numbers because in getSpecificShip() I have strict equality to get a ship that is under attack. But from other modules coordinates are transfered as strings to keep 0's, e.g. '03'. If it was a number in the first place, JS would erase 0 and hence an X coordinate was missing
     const arrayWithCoordinates = pairOfCoordinates;
-    const x = arrayWithCoordinates[0];
-    const y = arrayWithCoordinates[1];
+    const x = Number(arrayWithCoordinates[0]);
+    const y = Number(arrayWithCoordinates[1]);
 
     if (!this.#checkIfAttackIsAllowed(arrayWithCoordinates)) {
       return false;

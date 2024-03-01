@@ -65,9 +65,11 @@ function registerClicksOnBoards(event) {
   if (!game) {
     console.log('Board is not active. Start game to active');
     return;
+  } else if (game.getWinner()) {
+    console.log('Game over! Start new game');
+    return;
   }
 
-  console.log(`${game.getWhoseTurnItIs()} attacks now`);
   // Apply event delegations to board grids
   const isInsideSquare = event.target.closest('div.square');
   if (!isInsideSquare) return;
@@ -84,16 +86,18 @@ function registerClicksOnBoards(event) {
     console.log('Attack cannot be registered. Repeat again');
     return;
   } else {
-    console.log('Attack was registered');
-
     // Confirm if attack hit a ship or is a missed shot
     if (isInsideSquare.classList.contains('contains-ship')) {
       isInsideSquare.classList.add('successful-shot');
-      console.log('Hit a ship!!');
+      console.log('Hit a ship!');
 
       if (sunkShipsOfPlayerTwo !== game.getPlayerTwoSunkShips().length) {
         console.log('Sink the ship!');
         disableAdjacentSquaresToSunkShips(game);
+        if (game.getWinner()) {
+          console.log(`Game over! ${game.getWinner()} has won`);
+          return;
+        }
       }
     } else {
       isInsideSquare.classList.add('missed-shot');
@@ -101,37 +105,66 @@ function registerClicksOnBoards(event) {
     }
 
     hightlightComputerMoves();
-
-    // Game over
-    // if (game.getWinner()) {
-    //   console.log('GAME OVER!!!');
-    // }
-    // Allow the move that is a pre move to destroying all ships!!
   }
 }
 
 function hightlightComputerMoves() {
-  console.log(`${game.getWhoseTurnItIs()} attacks now`);
-
   const sunkShipsOfPlayerOne = game.getPlayerOneSunkShips().length;
-  const squareId = game.makeMove();
+
+  let squareId;
+  let isPreviouslyHitShip = game.getCoordinatesOfPreviouslyHitShip();
+  if (isPreviouslyHitShip) {
+    const partOfShipUnderAttack = game
+      .getCoordinatesOfPreviouslyHitShip()[0]
+      .join('');
+    squareId = game.makeMove(partOfShipUnderAttack);
+  } else {
+    squareId = game.makeMove();
+  }
+
   const squares = [...gridSquaresHuman.children];
   let targettedSquare;
-
   squares.forEach((square) => {
     if (square.classList.contains(squareId)) {
       targettedSquare = square;
-      console.log('Attack was registered...');
     }
   });
 
   if (targettedSquare.classList.contains('contains-ship')) {
-    targettedSquare.classList.add('successful-shot');
     console.log('Hit a ship!');
+    targettedSquare.classList.add('successful-shot');
 
     if (sunkShipsOfPlayerOne !== game.getPlayerOneSunkShips().length) {
       console.log('Sink the ship!');
+      game.updateCoordinatesOfPreviouslyHitShip(squareId);
       disableAdjacentSquaresToSunkShips(game);
+      if (game.getWinner()) {
+        console.log(`Game over! ${game.getWinner()} has won`);
+        return;
+      }
+    } else if (game.getCoordinatesOfPreviouslyHitShip()) {
+      console.log('Hit the saved ship');
+      game.updateCoordinatesOfPreviouslyHitShip(squareId);
+    } else {
+      console.log('Remember ship for next move');
+      const humanShips = game.getPlayerOneAllShips();
+      humanShips.forEach((ship) => {
+        const coordinatedShip = ship.coordinates;
+
+        // allShips array on game boards contains 1-square ships' pair of coordinates in an outer array when the pair is numbers. With multi-square ships, coordinates are still saved in an outer array. Though their pairs of coordinates are stored in inner arrays. Last but not least, it is not important for us to loop over 1-square ships because they will never be memorized as coordinatesForComputerToTarget
+        if (Array.isArray(coordinatedShip[0])) {
+          coordinatedShip.forEach((coordinates) => {
+            if (coordinates.join('') === squareId) {
+              const stillActiveShipSquares = ship.coordinates.filter(
+                (square) => {
+                  return squareId !== square.join('');
+                }
+              );
+              game.saveCoordinatesOfPreviouslyHitShip(stillActiveShipSquares);
+            }
+          });
+        }
+      });
     }
   } else {
     targettedSquare.classList.add('missed-shot');

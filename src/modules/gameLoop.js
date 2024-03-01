@@ -14,6 +14,7 @@ class GameLoop {
     );
     this.attacksNow = this.playerOne;
     this.thereIsAWinner = null;
+    this.coordinatesForComputerToTarget = null;
   }
 
   // Place 10 ships at pretedermined coodinates for now
@@ -72,27 +73,38 @@ class GameLoop {
 
     if (this.attacksNow.name === 'Human') {
       const move = coordinates[0];
-      const x = Number(move[0]);
-      const y = Number(move[1]);
-      // Check if move was successful. If not repeat it again??
+      const x = move[0];
+      const y = move[1];
       if (!this.playerOne.attackOpponent(x, y)) {
         return false;
       }
 
-      // Immediately terminate the game here if there is a board with "gameOver" set to true
-      if (this.#findBoardWithGameOver()) {
-        return false;
-      } else {
+      if (!this.#findBoardWithGameOver()) {
         this.#passTurns();
-        return true;
       }
+      return true;
     }
 
     if (this.attacksNow.name === 'Computer') {
-      const computerMove = this.playerTwo.attackOpponent();
+      let computerMove;
+      // Destructuring array assignment
+      // By default computer make random moves but if it hits something, then it will try to sink the ship until it succeeds
+      if (coordinates[0]) {
+        const [x, y] = coordinates[0];
+        computerMove = this.playerTwo.attackOpponent(x, y);
+        if (!computerMove) return false;
 
-      this.#passTurns();
-      return computerMove.join('');
+        if (!this.#findBoardWithGameOver()) {
+          this.#passTurns();
+        }
+        return `${x}${y}`;
+      } else {
+        computerMove = this.playerTwo.attackOpponent();
+        if (!this.#findBoardWithGameOver()) {
+          this.#passTurns();
+        }
+        return computerMove.join('');
+      }
     }
   }
 
@@ -118,5 +130,32 @@ class GameLoop {
 
   getPlayerTwoSunkShips() {
     return this.playerTwo.ownBoard.getSunkShipsProperty();
+  }
+
+  // Helper functions for computer smart moves
+  getPlayerOneAllShips() {
+    return this.playerOne.ownBoard.getAllShips();
+  }
+
+  getCoordinatesOfPreviouslyHitShip() {
+    return this.coordinatesForComputerToTarget;
+  }
+
+  saveCoordinatesOfPreviouslyHitShip(coordinates) {
+    this.coordinatesForComputerToTarget = coordinates;
+  }
+
+  updateCoordinatesOfPreviouslyHitShip(coordinates) {
+    if (
+      !this.coordinatesForComputerToTarget ||
+      this.coordinatesForComputerToTarget.length === 1
+    ) {
+      this.coordinatesForComputerToTarget = null;
+    } else {
+      this.coordinatesForComputerToTarget =
+        this.coordinatesForComputerToTarget.filter((square) => {
+          return coordinates !== square.join('');
+        });
+    }
   }
 }

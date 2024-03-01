@@ -31,27 +31,39 @@ class Computer extends Player {
     return moves;
   }
 
-  attackOpponent() {
+  attackOpponent(...smartMove) {
     if (!this.possibleMoves.length) {
       return false;
     }
 
-    let x;
-    let y;
-    let attemptedAttack;
-
-    do {
-      const randomIndex = Math.floor(Math.random() * this.possibleMoves.length);
-      x = Number(this.possibleMoves[randomIndex][0]);
-      y = Number(this.possibleMoves[randomIndex][1]);
-
-      attemptedAttack = this.enemyBoard.receiveAttack(x, y);
+    // This part is for "smart computer" but if the computer did not hit anything that argument is not given
+    if (smartMove[0]) {
+      const [x, y] = smartMove;
+      const attemptedAttack = this.enemyBoard.receiveAttack(x, y);
       this.possibleMoves = this.possibleMoves.filter((move) => {
         return move !== `${x}${y}`;
       });
-    } while (!attemptedAttack);
+      return attemptedAttack;
+    } else {
+      let x;
+      let y;
+      let attemptedAttack;
 
-    return [x, y]; // Return an array of coordinates to pass a test that ensures Computer does hit the Player's board at the coordinates
+      do {
+        const randomIndex = Math.floor(
+          Math.random() * this.possibleMoves.length
+        );
+        x = this.possibleMoves[randomIndex][0];
+        y = this.possibleMoves[randomIndex][1];
+
+        attemptedAttack = this.enemyBoard.receiveAttack(x, y);
+        this.possibleMoves = this.possibleMoves.filter((move) => {
+          return move !== `${x}${y}`;
+        });
+      } while (!attemptedAttack);
+
+      return [x, y]; // Return an array of coordinates to pass a test that ensures Computer does hit the Player's board at the coordinates
+    }
   }
 
   getLengthOfPossibleMovesArray() {
