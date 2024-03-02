@@ -18,7 +18,7 @@ class Computer extends Player {
     this.possibleMoves = this.#createAllPossibleMoves();
   }
 
-  // Create all possible moves. After each move, that move is going to be removed from possibleMoves so that moves are never repeated
+  // Create all possible moves. After each move, that move is going to be removed from possibleMoves so that moves are never repeated. However, adjacentToSomeSunkShip moves are reserved. They are removed only when computer tries to use them but they apparently do not count as successful moves
   #createAllPossibleMoves() {
     const moves = [];
 
@@ -32,23 +32,19 @@ class Computer extends Player {
   }
 
   attackOpponent(...smartMove) {
-    if (!this.possibleMoves.length) {
-      return false;
-    }
-
-    // This part is for "smart computer" but if the computer did not hit anything that argument is not given
+    // If computer hits a ship partially, the smartMove argument is given
     if (smartMove[0]) {
       const [x, y] = smartMove;
-      const attemptedAttack = this.enemyBoard.receiveAttack(x, y);
+      this.enemyBoard.receiveAttack(x, y);
       this.possibleMoves = this.possibleMoves.filter((move) => {
         return move !== `${x}${y}`;
       });
-      return attemptedAttack;
     } else {
       let x;
       let y;
       let attemptedAttack;
-
+      
+      // This loop might have a few iterations if out of possibleMoves, computer chooses a move that is listed there even though it is no longer available (e.g. adjacentToSomeSunkShip). Coming across those moves here, they will be manually removed from possibleMoves. And computer eventually makes a legal move and moves the game forward
       do {
         const randomIndex = Math.floor(
           Math.random() * this.possibleMoves.length
@@ -62,7 +58,7 @@ class Computer extends Player {
         });
       } while (!attemptedAttack);
 
-      return [x, y]; // Return an array of coordinates to pass a test that ensures Computer does hit the Player's board at the coordinates
+      return [x, y]; // Return an array of coordinates because they are important to access a specific square in the UI implementation. When human clicks manually on squares, it is easy to track but computer must process this in a different way by returning the number of square (div) it attacked
     }
   }
 

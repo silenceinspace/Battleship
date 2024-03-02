@@ -14,7 +14,7 @@ class Gameboard {
     for (let i = 0; i < 10; i++) {
       board[i] = [];
       for (let j = 0; j < 10; j++) {
-        // In each square of the board, there is an object with a few properties to control the game's logic
+        // In each square of the board, there is an object with a few properties to control the game's flow
         board[i].push([
           {
             containsShip: false,
@@ -71,7 +71,6 @@ class Gameboard {
       if (x > 9 || y > 9 || x < 0 || y < 0) {
         continue;
       } else if (this.getInfoAtBoardCoordinates(x, y).containsShip) {
-        // Squares that are a part of the ship must not be reserved because they are not adjacent in any case
         continue;
       }
 
@@ -146,18 +145,16 @@ class Gameboard {
     const ship = new Ship(shipSize);
 
     if (ship.length > 1) {
-      // Create two arrays to place ships over multiple squares, doing it in both directions
       const allValuesOfX = [];
       const allValuesOfY = [];
 
-      // If placed horizontally, the ship's first square will generate the rest of squares to the right, without changing the row
+      // If placed horizontally, the ship's first square will generate the rest of squares to the right, without changing the row. If placed vertically, the ship's first square will generate the rest of squares down, without changing the column
       if (direction === 'hor') {
         for (let i = 0; i < ship.length; i++) {
           allValuesOfX.push(x);
           allValuesOfY.push(y);
           x += 1;
         }
-        // If placed vertically, the ship's first square will generate the rest of squares down, without changing the column
       } else if (direction === 'ver') {
         for (let i = 0; i < ship.length; i++) {
           allValuesOfX.push(x);
@@ -166,7 +163,6 @@ class Gameboard {
         }
       }
 
-      // Check if any of the restrictions is violated before placing a ship. If yes, the ship is not placed on the board
       if (!this.#compareAgainstLimitConditions(allValuesOfX, allValuesOfY)) {
         return false;
       }
@@ -207,7 +203,7 @@ class Gameboard {
       this.#reserveAdjacentSquares(x, y, 'isAdjacentToSomeShip');
       this.allShips.push({ shipInstance: ship, coordinates: [x, y] });
     }
-    // To confirm that the ship has been placed successfully
+    // Confirm that the ship has been placed successfully
     return true;
   }
 
@@ -288,7 +284,7 @@ class Gameboard {
       return false;
     }
 
-    // hasBeenTargetted property can either mean a successful attack (hit a ship) or a failed one (a missed shot)
+    // hasBeenTargetted property implies either a successful attack (hit a ship) or a failed one (a missed shot)
     this.getInfoAtBoardCoordinates(x, y).hasBeenTargetted = true;
     if (this.#findTargettedShip(arrayWithCoordinates)) {
       const targettedShip = this.getSpecificShip(x, y);
@@ -314,10 +310,11 @@ class Gameboard {
             );
           }
         }
-        // Gameboard should keep track of its termination state because GameLoop will rely on it later
+        // Gameboard should keep track of its termination state because GameLoop will rely on it later. If one board has gameOver property set to true, then there must be a winner too
         this.#checkIfAllShipsHaveBeenDestroyed();
       }
     }
+    // It is important to return true here because this boolean is carried through multiple modules. For example, a computer's move might not be legal in the scenario when out of possibleMoves array it chooses one which is restricted by adjacentToSomeSunkShip property. These moves are not removed from the list of possible computer moves when the ship has been sunk, so they could be picked but are not going to register an attack
     return true;
   }
 

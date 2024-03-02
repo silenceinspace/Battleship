@@ -17,7 +17,6 @@ class GameLoop {
     this.coordinatesForComputerToTarget = null;
   }
 
-  // Place 10 ships at pretedermined coodinates for now
   #populateBoardWithShips() {
     const board = new Gameboard();
 
@@ -100,9 +99,8 @@ class GameLoop {
       const move = coordinates[0];
       const x = move[0];
       const y = move[1];
-      if (!this.playerOne.attackOpponent(x, y)) {
-        return false;
-      }
+
+      this.playerOne.attackOpponent(x, y);
 
       if (!this.#findBoardWithGameOver()) {
         this.#passTurns();
@@ -113,11 +111,10 @@ class GameLoop {
     if (this.attacksNow.name === 'Computer') {
       let computerMove;
       // Destructuring array assignment
-      // By default computer make random moves but if it hits something, then it will try to sink the ship until it succeeds
+      // By default computer make random moves but if it hits something, then it will try to sink the ship until it succeeds. It achieves the goal by accessing that ship object on allShips array of player's board and storing all its coordinates
       if (coordinates[0]) {
         const [x, y] = coordinates[0];
-        computerMove = this.playerTwo.attackOpponent(x, y);
-        if (!computerMove) return false;
+        this.playerTwo.attackOpponent(x, y);
 
         if (!this.#findBoardWithGameOver()) {
           this.#passTurns();
@@ -151,12 +148,13 @@ class GameLoop {
 
   getSunkShipsOf(name) {
     if (name === 'Human') {
-      return this.playerOne.ownBoard.getSunkShipsProperty();
+      return this.playerOne.ownBoard.getSunkShipsProperty().length;
     } else if (name === 'Computer') {
-      return this.playerTwo.ownBoard.getSunkShipsProperty();
+      return this.playerTwo.ownBoard.getSunkShipsProperty().length;
     }
   }
 
+  // Randomize functionality makes usage of this method, which randomly generated ships locations and players reference the newly created grid
   changeShipsLocations() {
     this.humanBoard = this.#populateBoardWithShips();
     this.playerOne = new Player('Human', this.humanBoard, this.computerBoard);
@@ -180,6 +178,7 @@ class GameLoop {
     this.coordinatesForComputerToTarget = coordinates;
   }
 
+  // This method will dynamically update the array with coordinates of the currently attacked ships. And when there is one last pair of coordinates, it sets coordinatesForComputerToTarget to its initial value — null. In the meantime, it can be possibly called with attacked ships of length 1 and in that case nothing has ever been stored in coordinatesForComputerToTarger so we prevent the app from crashing by setting null too
   updateCoordinatesOfPreviouslyHitShip(coordinates) {
     if (
       !this.coordinatesForComputerToTarget ||
