@@ -4,8 +4,8 @@ export { GameLoop };
 
 class GameLoop {
   constructor() {
-    this.humanBoard = this.#populateBoardWithShips('Human');
-    this.computerBoard = this.#populateBoardWithShips('Computer');
+    this.humanBoard = this.#populateBoardWithShips();
+    this.computerBoard = this.#populateBoardWithShips();
     this.playerOne = new Player('Human', this.humanBoard, this.computerBoard);
     this.playerTwo = new Computer(
       'Computer',
@@ -13,39 +13,64 @@ class GameLoop {
       this.humanBoard
     );
     this.attacksNow = this.playerOne;
-    this.thereIsAWinner = null;
+    this.winner = null;
     this.coordinatesForComputerToTarget = null;
   }
 
   // Place 10 ships at pretedermined coodinates for now
-  #populateBoardWithShips(player) {
+  #populateBoardWithShips() {
     const board = new Gameboard();
 
-    if (player === 'Human') {
-      board.placeShip(1, 0, 1);
-      board.placeShip(2, 9, 1);
-      board.placeShip(5, 9, 1);
-      board.placeShip(9, 9, 1);
-      board.placeShip(7, 0, 2, 'hor');
-      board.placeShip(4, 4, 2, 'ver');
-      board.placeShip(6, 4, 2, 'ver');
-      board.placeShip(3, 0, 3, 'hor');
-      board.placeShip(9, 2, 3, 'ver');
-      board.placeShip(0, 3, 4, 'ver');
-    } else if (player === 'Computer') {
-      board.placeShip(0, 0, 1);
-      board.placeShip(9, 9, 1);
-      board.placeShip(0, 9, 1);
-      board.placeShip(9, 0, 1);
-      board.placeShip(2, 2, 2, 'ver');
-      board.placeShip(4, 2, 2, 'ver');
-      board.placeShip(6, 2, 2, 'hor');
-      board.placeShip(0, 5, 3, 'hor');
-      board.placeShip(4, 5, 3, 'hor');
-      board.placeShip(8, 4, 4, 'ver');
+    let lengthOne = 0;
+    let lengthTwo = 0;
+    let lengthThree = 0;
+    let lengthFour = 0;
+
+    while (lengthFour === 0) {
+      const [x, y, direction] = this.#generateValuesToPlaceShip();
+      const isPlaced = board.placeShip(x, y, 4, direction);
+      if (isPlaced) {
+        lengthFour++;
+      }
+    }
+
+    while (lengthThree !== 2) {
+      const [x, y, direction] = this.#generateValuesToPlaceShip();
+      const isPlaced = board.placeShip(x, y, 3, direction);
+      if (isPlaced) {
+        lengthThree++;
+      }
+    }
+
+    while (lengthTwo !== 3) {
+      const [x, y, direction] = this.#generateValuesToPlaceShip();
+      const isPlaced = board.placeShip(x, y, 2, direction);
+      if (isPlaced) {
+        lengthTwo++;
+      }
+    }
+
+    while (lengthOne !== 4) {
+      const [x, y, direction] = this.#generateValuesToPlaceShip();
+      const isPlaced = board.placeShip(x, y, 1, direction);
+      if (isPlaced) {
+        lengthOne++;
+      }
     }
 
     return board;
+  }
+
+  #generateValuesToPlaceShip() {
+    const directions = ['ver', 'hor'];
+    const index = Math.floor(Math.random() * 2);
+    const randomDirection = directions[index];
+    const x = Math.floor(Math.random() * 10);
+    const y = Math.floor(Math.random() * 10);
+
+    const values = [];
+    values.push(x, y, randomDirection);
+    return values;
   }
 
   #passTurns() {
@@ -56,10 +81,10 @@ class GameLoop {
 
   #findBoardWithGameOver() {
     if (this.humanBoard.gameOver) {
-      this.thereIsAWinner = this.playerTwo.name;
+      this.winner = this.playerTwo.name;
       return true;
     } else if (this.computerBoard.gameOver) {
-      this.thereIsAWinner = this.playerOne.name;
+      this.winner = this.playerOne.name;
       return true;
     } else {
       return false;
@@ -67,7 +92,7 @@ class GameLoop {
   }
 
   makeMove(...coordinates) {
-    if (this.thereIsAWinner) {
+    if (this.winner) {
       return false;
     }
 
@@ -113,27 +138,37 @@ class GameLoop {
   }
 
   getWinner() {
-    return this.thereIsAWinner;
+    return this.winner;
   }
 
-  getHumanBoard() {
-    return this.humanBoard.board;
+  getBoardOf(name) {
+    if (name === 'Human') {
+      return this.humanBoard.board;
+    } else if (name === 'Computer') {
+      return this.computerBoard.board;
+    }
   }
 
-  getComputerBoard() {
-    return this.computerBoard.board;
+  getSunkShipsOf(name) {
+    if (name === 'Human') {
+      return this.playerOne.ownBoard.getSunkShipsProperty();
+    } else if (name === 'Computer') {
+      return this.playerTwo.ownBoard.getSunkShipsProperty();
+    }
   }
 
-  getPlayerOneSunkShips() {
-    return this.playerOne.ownBoard.getSunkShipsProperty();
-  }
-
-  getPlayerTwoSunkShips() {
-    return this.playerTwo.ownBoard.getSunkShipsProperty();
+  changeShipsLocations() {
+    this.humanBoard = this.#populateBoardWithShips();
+    this.playerOne = new Player('Human', this.humanBoard, this.computerBoard);
+    this.playerTwo = new Computer(
+      'Computer',
+      this.computerBoard,
+      this.humanBoard
+    );
   }
 
   // Helper functions for computer smart moves
-  getPlayerOneAllShips() {
+  getHumanAllShips() {
     return this.playerOne.ownBoard.getAllShips();
   }
 

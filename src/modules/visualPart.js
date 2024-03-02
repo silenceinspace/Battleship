@@ -1,8 +1,11 @@
 import { GameLoop } from './gameLoop';
-export { generateGrid };
+export { initializeGrids };
 
 // Select DOM elements
 const startGameButton = document.querySelector('.start-game-button');
+const randomizeButton = document.querySelector('.randomize-ships-locations');
+const newGameButton = document.querySelector('.new-game-button');
+
 const grids = document.querySelectorAll('.board-grid');
 const numberGridIndexes = document.querySelectorAll('.number-board-indexes');
 const letterGridIndexes = document.querySelectorAll('.letter-board-indexes');
@@ -23,12 +26,12 @@ function createAndAppendElement(elementType, appendTo, ...classArg) {
 }
 
 // This method is called in index.js
-function generateGrid() {
+function initializeGrids() {
   grids.forEach((div) => {
     for (let i = 0; i < 100; i++) {
-      const element = createAndAppendElement('div', div, 'square', 'disabled');
+      const element = createAndAppendElement('div', div, 'square');
 
-      // Add ids for squares to tie array boards with grid. Reverse them because first coordinate is X, so it changes more frequently
+      // Add ids for squares to tie array boards with grid. Reverse them because first coordinate is X, so it changes more frequently and make them strings to keep 0's in 01, 02
       if (i < 10) {
         element.classList.add(i + '0');
       } else {
@@ -52,20 +55,69 @@ function generateGrid() {
       element.textContent = characters[i];
     }
   });
+
+  displayShipsOnBoards();
 }
 
-// Varible holding gameLoop object, updating its inner state with "Start game"
-let game = false;
+// Varible holding gameLoop object
+let game = new GameLoop();
 
-// Make sure that clicks are not registered by the player on its own board while playing against the computer (before starting a game, it is important to select a game mode — 2 players or player vs AI)
-grids.forEach((div) => {
-  div.addEventListener('click', registerClicksOnBoards);
-});
-function registerClicksOnBoards(event) {
-  if (!game) {
-    console.log('Board is not active. Start game to active');
+// Buttons to control game flow
+startGameButton.addEventListener('click', startGame);
+function startGame() {
+  const buttonStatus = startGameButton.classList;
+
+  if (buttonStatus.contains('not-started')) {
+    const shipsWerePriorlyPlaced = confirm(
+      'Are your ships placed well? If no, you can move them around'
+    );
+    if (shipsWerePriorlyPlaced) {
+      startGameButton.classList.replace('not-started', 'started');
+      console.log('Starting game...');
+      gridSquaresComputer.addEventListener('click', registerClicksOnBoards);
+      toggleHoverEffectOnBoard(gridSquaresComputer);
+    } else {
+      console.log('You have a chance to move your ships');
+      return;
+    }
+  } else if (buttonStatus.contains('started')) {
+    console.log('Button is not available');
     return;
-  } else if (game.getWinner()) {
+  }
+}
+
+newGameButton.addEventListener('click', restartGame);
+function restartGame() {
+  const buttonStatus = startGameButton.classList;
+
+  if (buttonStatus.contains('started')) {
+    console.log('Restarting game...');
+    buttonStatus.replace('started', 'not-started');
+    gridSquaresComputer.removeEventListener('click', registerClicksOnBoards);
+    game = new GameLoop();
+    clearPreviousBoardsVisuals();
+  } else {
+    console.log('At first you need to start any game');
+    return;
+  }
+}
+
+randomizeButton.addEventListener('click', randomizeShipLocations);
+function randomizeShipLocations() {
+  const buttonStatus = startGameButton.classList;
+
+  if (buttonStatus.contains('started')) {
+    console.log('Cannot move ships during the game');
+    return;
+  } else {
+    game.changeShipsLocations();
+    clearPreviousBoardsVisuals();
+  }
+}
+
+//
+function registerClicksOnBoards(event) {
+  if (game.getWinner()) {
     console.log('Game over! Start new game');
     return;
   }
@@ -79,7 +131,7 @@ function registerClicksOnBoards(event) {
   });
 
   // Before the attack look at the sunkShips property and compare it with the state of the board after the attack
-  const sunkShipsOfPlayerTwo = game.getPlayerTwoSunkShips().length;
+  const sunkShipsOfPlayerTwo = game.getSunkShipsOf('Computer').length;
 
   const playerAttack = game.makeMove(getSquareId[0]);
   if (!playerAttack) {
@@ -91,7 +143,7 @@ function registerClicksOnBoards(event) {
       isInsideSquare.classList.add('successful-shot');
       console.log('Hit a ship!');
 
-      if (sunkShipsOfPlayerTwo !== game.getPlayerTwoSunkShips().length) {
+      if (sunkShipsOfPlayerTwo !== game.getSunkShipsOf('Computer').length) {
         console.log('Sink the ship!');
         disableAdjacentSquaresToSunkShips(game);
         if (game.getWinner()) {
@@ -109,7 +161,7 @@ function registerClicksOnBoards(event) {
 }
 
 function hightlightComputerMoves() {
-  const sunkShipsOfPlayerOne = game.getPlayerOneSunkShips().length;
+  const sunkShipsOfPlayerOne = game.getSunkShipsOf('Human').length;
 
   let squareId;
   let isPreviouslyHitShip = game.getCoordinatesOfPreviouslyHitShip();
@@ -134,7 +186,7 @@ function hightlightComputerMoves() {
     console.log('Hit a ship!');
     targettedSquare.classList.add('successful-shot');
 
-    if (sunkShipsOfPlayerOne !== game.getPlayerOneSunkShips().length) {
+    if (sunkShipsOfPlayerOne !== game.getSunkShipsOf('Human').length) {
       console.log('Sink the ship!');
       game.updateCoordinatesOfPreviouslyHitShip(squareId);
       disableAdjacentSquaresToSunkShips(game);
@@ -147,7 +199,7 @@ function hightlightComputerMoves() {
       game.updateCoordinatesOfPreviouslyHitShip(squareId);
     } else {
       console.log('Remember ship for next move');
-      const humanShips = game.getPlayerOneAllShips();
+      const humanShips = game.getHumanAllShips();
       humanShips.forEach((ship) => {
         const coordinatedShip = ship.coordinates;
 
@@ -172,64 +224,27 @@ function hightlightComputerMoves() {
   }
 }
 
-startGameButton.addEventListener('click', startGame);
-function startGame() {
-  const statusOfButton = startGameButton.classList;
-
-  if (statusOfButton.contains('not-started')) {
-    startGameButton.classList.replace('not-started', 'started');
-    console.log('Starting game...');
-    game = new GameLoop();
-    addHoverEffectToGridSquares(grids);
-    displayShipsOnBoards();
-  } else if (statusOfButton.contains('started')) {
-    const confirmMessage = confirm('Do you really want to start a new game?');
-    if (confirmMessage) {
-      console.log('Starting new game...');
-      game = new GameLoop();
-      clearPreviousBoardsVisuals(grids);
-    } else {
-      console.log('Keeping the relevant game!');
-    }
-  }
-}
-
-function clearPreviousBoardsVisuals(boards) {
-  boards.forEach((div) => {
-    const divsOfBoard = [...div.children];
-
-    divsOfBoard.forEach((square) => {
-      const classValues = square.classList;
-
-      if (classValues.contains('missed-shot')) {
-        square.classList.remove('missed-shot');
-      }
-
-      if (classValues.contains('successful-shot')) {
-        square.classList.remove('successful-shot');
-      }
-
-      if (classValues.contains('adjacent-to-sunk-ship')) {
-        square.classList.remove('adjacent-to-sunk-ship');
-      }
-    });
+function clearPreviousBoardsVisuals() {
+  const boardElements = [...grids, ...letterGridIndexes, ...numberGridIndexes];
+  boardElements.forEach((element) => {
+    element.replaceChildren();
   });
+  initializeGrids();
 }
 
-function addHoverEffectToGridSquares(divs) {
-  divs.forEach((div) => {
-    const divsOfOneBoard = [...div.children];
-    divsOfOneBoard.forEach((square) => {
-      square.classList.replace('disabled', 'active');
-    });
+// When game over, then this effect is removed
+function toggleHoverEffectOnBoard(divs) {
+  const arrayOfGridDivs = [...divs.children];
+  arrayOfGridDivs.forEach((div) => {
+    div.classList.toggle('active');
   });
 }
 
 function loopOverAllDivsAndArraySquares(currentGame, property) {
   const humanGridDivs = [...gridSquaresHuman.children];
   const computerGridDivs = [...gridSquaresComputer.children];
-  const humanBoard = currentGame.getHumanBoard();
-  const boardComputer = currentGame.getComputerBoard();
+  const humanBoard = currentGame.getBoardOf('Human');
+  const boardComputer = currentGame.getBoardOf('Computer');
 
   let counterForArrayWithDivs = 0;
   for (let i = 0; i < 10; i++) {

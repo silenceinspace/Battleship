@@ -1,4 +1,4 @@
 import './../UI/styles.css';
-import { generateGrid } from './visualPart.js';
+import { initializeGrids } from './visualPart.js';
 
-generateGrid();
+initializeGrids();

@@ -22,6 +22,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 30px;
 }
 
 button {
@@ -38,9 +39,20 @@ button:hover {
   text-decoration: underline;
 }
 
-.start-game-button {
+.start-game-button,
+.randomize-ships-locations,
+.new-game-button {
   font-size: 2rem;
   font-weight: bold;
+}
+
+.start-game-button.not-started {
+  background-color: green;
+}
+
+.start-game-button.started {
+  background-color: red;
+  pointer-events: none;
 }
 
 #container .main-part {
@@ -112,23 +124,22 @@ button:hover {
   background-color: green;
 }
 
-.square.disabled {
-  background-color: grey;
-}
-
-.square.active:hover {
-  cursor: pointer;
+.board-grid.computer .square.active:hover {
+  cursor: crosshair;
   background-color: orange;
 }
 
 .square.missed-shot {
   background-color: grey;
+  pointer-events: none;
 }
 
 .square.successful-shot {
   background-color: red;
+  pointer-events: none;
 }
 
 .square.adjacent-to-sunk-ship {
   background-color: darkred;
+  pointer-events: none;
 }
