@@ -65,106 +65,100 @@ let game = new GameLoop();
 // Buttons to control game flow
 startGameButton.addEventListener('click', startGame);
 function startGame() {
-  const buttonStatus = startGameButton.classList;
+  const confirmStartGame = confirm(
+    'After starting you will not be able to randomize ships locations anymore!'
+  );
 
-  if (buttonStatus.contains('not-started')) {
-    const shipsWerePriorlyPlaced = confirm(
-      'Are your ships placed well? If no, you can move them around'
-    );
-    if (shipsWerePriorlyPlaced) {
-      startGameButton.classList.replace('not-started', 'started');
-      console.log('Starting game...');
-      gridSquaresComputer.addEventListener('click', registerClicksOnBoards);
-      toggleHoverEffectOnBoard(gridSquaresComputer);
-    } else {
-      console.log('You have a chance to move your ships');
-      return;
-    }
-  } else if (buttonStatus.contains('started')) {
-    console.log('Button is not available');
-    return;
+  if (confirmStartGame) {
+    startGameButton.classList.replace('not-started', 'started');
+    alert('Game has been started!');
+    toggleHoverEffectOnBoard(gridSquaresComputer);
+  } else {
+    alert('You can still randomize your ships locations!');
   }
 }
 
 newGameButton.addEventListener('click', restartGame);
 function restartGame() {
   const buttonStatus = startGameButton.classList;
-
-  if (buttonStatus.contains('started')) {
-    console.log('Restarting game...');
-    buttonStatus.replace('started', 'not-started');
-    gridSquaresComputer.removeEventListener('click', registerClicksOnBoards);
-    game = new GameLoop();
-    clearPreviousBoardsVisuals();
-  } else {
-    console.log('At first you need to start any game');
+  if (buttonStatus.contains('not-started')) {
+    alert('No active game has been found. You need to start one!');
     return;
   }
+
+  if (!game.getWinner()) {
+    const confirmNewGame = confirm('Are you sure you want to start new game?');
+    if (!confirmNewGame) {
+      alert('Your active game is saved. Play on!');
+      return;
+    }
+  }
+
+  alert('New game!');
+  buttonStatus.replace('started', 'not-started');
+  game = new GameLoop();
+  clearPreviousBoardsVisuals();
 }
 
 randomizeButton.addEventListener('click', randomizeShipLocations);
 function randomizeShipLocations() {
   const buttonStatus = startGameButton.classList;
-
   if (buttonStatus.contains('started')) {
-    console.log('Cannot move ships during the game');
-    return;
+    alert('Cannot randomize ships locations during the game!');
   } else {
     game.changeShipsLocations();
     clearPreviousBoardsVisuals();
   }
 }
 
-//
+gridSquaresComputer.addEventListener('click', registerClicksOnBoards);
 function registerClicksOnBoards(event) {
   if (game.getWinner()) {
-    console.log('Game over! Start new game');
+    alert('Game over! Start new game!');
     return;
+  } else {
+    const buttonStatus = startGameButton.classList;
+    if (buttonStatus.contains('not-started')) {
+      alert('Game has not been started yet!');
+      return;
+    }
   }
 
   // Apply event delegations to board grids
   const isInsideSquare = event.target.closest('div.square');
   if (!isInsideSquare) return;
 
+  // Before the attack look at the sunkShips property and compare it with the state of the board after the attack to understand if any ship has been sunk during the move
+  const sunkShipsOfPlayerTwo = game.getSunkShipsOf('Computer').length;
+
   const getSquareId = [...isInsideSquare.classList].filter((classValue) => {
     return classValue.length === 2 ? true : false;
   });
+  game.makeMove(getSquareId[0]);
+  if (isInsideSquare.classList.contains('contains-ship-hidden')) {
+    isInsideSquare.classList.add('successful-shot');
 
-  // Before the attack look at the sunkShips property and compare it with the state of the board after the attack
-  const sunkShipsOfPlayerTwo = game.getSunkShipsOf('Computer').length;
-
-  const playerAttack = game.makeMove(getSquareId[0]);
-  if (!playerAttack) {
-    console.log('Attack cannot be registered. Repeat again');
-    return;
-  } else {
-    // Confirm if attack hit a ship or is a missed shot
-    if (isInsideSquare.classList.contains('contains-ship')) {
-      isInsideSquare.classList.add('successful-shot');
-      console.log('Hit a ship!');
-
-      if (sunkShipsOfPlayerTwo !== game.getSunkShipsOf('Computer').length) {
-        console.log('Sink the ship!');
-        disableAdjacentSquaresToSunkShips(game);
-        if (game.getWinner()) {
-          console.log(`Game over! ${game.getWinner()} has won`);
-          return;
-        }
+    if (sunkShipsOfPlayerTwo !== game.getSunkShipsOf('Computer').length) {
+      disableAdjacentSquaresToSunkShips(game);
+      if (game.getWinner()) {
+        alert(`Game over! ${game.getWinner()} has won!`);
+        toggleHoverEffectOnBoard(gridSquaresComputer);
+        return;
       }
-    } else {
-      isInsideSquare.classList.add('missed-shot');
-      console.log('Missed shot!!');
     }
-
-    hightlightComputerMoves();
+  } else {
+    isInsideSquare.classList.add('missed-shot');
   }
+
+  computerMakesImmediateMove();
 }
 
-function hightlightComputerMoves() {
+function computerMakesImmediateMove() {
   const sunkShipsOfPlayerOne = game.getSunkShipsOf('Human').length;
 
   let squareId;
   let isPreviouslyHitShip = game.getCoordinatesOfPreviouslyHitShip();
+  // When computer hits a ship but does not sink it fully, it will store the whole ship object and sink it in the upcoming moves
   if (isPreviouslyHitShip) {
     const partOfShipUnderAttack = game
       .getCoordinatesOfPreviouslyHitShip()[0]
@@ -183,27 +177,26 @@ function hightlightComputerMoves() {
   });
 
   if (targettedSquare.classList.contains('contains-ship')) {
-    console.log('Hit a ship!');
     targettedSquare.classList.add('successful-shot');
 
     if (sunkShipsOfPlayerOne !== game.getSunkShipsOf('Human').length) {
-      console.log('Sink the ship!');
       game.updateCoordinatesOfPreviouslyHitShip(squareId);
       disableAdjacentSquaresToSunkShips(game);
+
       if (game.getWinner()) {
-        console.log(`Game over! ${game.getWinner()} has won`);
+        alert(`Game over! ${game.getWinner()} has won`);
+        revealSurvivedShips();
+        toggleHoverEffectOnBoard(gridSquaresComputer);
         return;
       }
     } else if (game.getCoordinatesOfPreviouslyHitShip()) {
-      console.log('Hit the saved ship');
       game.updateCoordinatesOfPreviouslyHitShip(squareId);
     } else {
-      console.log('Remember ship for next move');
       const humanShips = game.getHumanAllShips();
       humanShips.forEach((ship) => {
         const coordinatedShip = ship.coordinates;
 
-        // allShips array on game boards contains 1-square ships' pair of coordinates in an outer array when the pair is numbers. With multi-square ships, coordinates are still saved in an outer array. Though their pairs of coordinates are stored in inner arrays. Last but not least, it is not important for us to loop over 1-square ships because they will never be memorized as coordinatesForComputerToTarget
+        // allShips array on game boards contains 1-square ships' pair of coordinates in an outer array where the pair is numbers. With multi-square ships, coordinates are still saved in an outer array. Though their pairs of coordinates are stored in inner arrays. Last but not least, it is not important for us to loop over 1-square ships because they will never be memorized as coordinatesForComputerToTarget
         if (Array.isArray(coordinatedShip[0])) {
           coordinatedShip.forEach((coordinates) => {
             if (coordinates.join('') === squareId) {
@@ -220,7 +213,6 @@ function hightlightComputerMoves() {
     }
   } else {
     targettedSquare.classList.add('missed-shot');
-    console.log('Missed shot!');
   }
 }
 
@@ -255,9 +247,11 @@ function loopOverAllDivsAndArraySquares(currentGame, property) {
       if (computerSquare[property]) {
         if (property === 'containsShip') {
           computerGridDivs[counterForArrayWithDivs].classList.add(
-            'contains-ship'
+            'contains-ship-hidden'
           );
-        } else if (property === 'isAdjacentToSomeSunkShip') {
+        }
+
+        if (property === 'isAdjacentToSomeSunkShip') {
           computerGridDivs[counterForArrayWithDivs].classList.add(
             'adjacent-to-sunk-ship'
           );
@@ -285,4 +279,16 @@ function displayShipsOnBoards() {
 
 function disableAdjacentSquaresToSunkShips() {
   loopOverAllDivsAndArraySquares(game, 'isAdjacentToSomeSunkShip');
+}
+
+function revealSurvivedShips() {
+  const array = [...gridSquaresComputer.children];
+  array.forEach((square) => {
+    if (
+      square.classList.contains('contains-ship-hidden') &&
+      !square.classList.contains('successful-shot')
+    ) {
+      square.classList.add('highlight-survived-ship');
+    }
+  });
 }

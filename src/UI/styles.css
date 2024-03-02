@@ -32,18 +32,13 @@ button {
   border-radius: 15px;
   background-color: purple;
   color: white;
+  font-size: 2rem;
+  font-weight: bold;
 }
 
 button:hover {
   cursor: pointer;
   text-decoration: underline;
-}
-
-.start-game-button,
-.randomize-ships-locations,
-.new-game-button {
-  font-size: 2rem;
-  font-weight: bold;
 }
 
 .start-game-button.not-started {
@@ -120,7 +115,8 @@ button:hover {
   background-color: white;
 }
 
-.square.contains-ship {
+.square.contains-ship,
+.square.highlight-survived-ship {
   background-color: green;
 }
 
@@ -129,17 +125,13 @@ button:hover {
   background-color: orange;
 }
 
-.square.missed-shot {
+.square.missed-shot,
+.square.adjacent-to-sunk-ship {
   background-color: grey;
   pointer-events: none;
 }
 
 .square.successful-shot {
   background-color: red;
-  pointer-events: none;
-}
-
-.square.adjacent-to-sunk-ship {
-  background-color: darkred;
   pointer-events: none;
 }
